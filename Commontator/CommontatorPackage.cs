@@ -26,7 +26,7 @@ namespace Spudnoggin.Commontator
     [PackageRegistration(UseManagedResourcesOnly = true)]
     // This attribute is used to register the information needed to show this package
     // in the Help/About dialog of Visual Studio.
-    [InstalledProductRegistration("#110", "#112", "1.0", IconResourceID = 400)]
+    [InstalledProductRegistration("#110", "#112", "0.1", IconResourceID = 400)]
     [Guid(GuidList.guidCommontatorPkgString)]
     public sealed class CommontatorPackage : Package
     {
@@ -39,7 +39,7 @@ namespace Spudnoggin.Commontator
         /// </summary>
         public CommontatorPackage()
         {
-            Debug.WriteLine(string.Format(CultureInfo.CurrentCulture, "Entering constructor for: {0}", this.ToString()));
+            ////Debug.WriteLine(string.Format(CultureInfo.CurrentCulture, "Entering constructor for: {0}", this.ToString()));
         }
 
 
@@ -54,7 +54,7 @@ namespace Spudnoggin.Commontator
         /// </summary>
         protected override void Initialize()
         {
-            Debug.WriteLine (string.Format(CultureInfo.CurrentCulture, "Entering Initialize() of: {0}", this.ToString()));
+            ////Debug.WriteLine (string.Format(CultureInfo.CurrentCulture, "Entering Initialize() of: {0}", this.ToString()));
             base.Initialize();
 
         }
