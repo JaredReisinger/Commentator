@@ -1,0 +1,40 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.21005.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Commontator", "Commontator\Commontator.csproj", "{D0777B17-E20B-4AC2-A7CC-4D7A33FB0780}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Commontator_IntegrationTests", "Commontator\Commontator_IntegrationTests\Commontator_IntegrationTests.csproj", "{EACBC43E-DD0C-4285-AA1F-59224B640872}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{D08A0202-7CDC-4E20-9210-0D957C838CD1}"
+	ProjectSection(SolutionItems) = preProject
+		IntegrationTests.testsettings = IntegrationTests.testsettings
+		UnitTests.testsettings = UnitTests.testsettings
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Commontator_UnitTests", "Commontator\Commontator_UnitTests\Commontator_UnitTests.csproj", "{AFB5BDD7-098A-4FE3-93C4-432EFF561651}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D0777B17-E20B-4AC2-A7CC-4D7A33FB0780}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D0777B17-E20B-4AC2-A7CC-4D7A33FB0780}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D0777B17-E20B-4AC2-A7CC-4D7A33FB0780}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D0777B17-E20B-4AC2-A7CC-4D7A33FB0780}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EACBC43E-DD0C-4285-AA1F-59224B640872}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EACBC43E-DD0C-4285-AA1F-59224B640872}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EACBC43E-DD0C-4285-AA1F-59224B640872}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EACBC43E-DD0C-4285-AA1F-59224B640872}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AFB5BDD7-098A-4FE3-93C4-432EFF561651}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AFB5BDD7-098A-4FE3-93C4-432EFF561651}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AFB5BDD7-098A-4FE3-93C4-432EFF561651}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AFB5BDD7-098A-4FE3-93C4-432EFF561651}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
