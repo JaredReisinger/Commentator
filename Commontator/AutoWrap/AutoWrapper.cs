@@ -36,99 +36,113 @@ namespace Spudnoggin.Commontator.AutoWrap
 
         void TextBuffer_Changed(object sender, Microsoft.VisualStudio.Text.TextContentChangedEventArgs e)
         {
+            // TODO: Only kick in for single changes...
+            // Gather *all* the consecutive matching lines and re-wrap?
             foreach (var change in e.Changes)
             {
-                var line = e.After.GetLineFromPosition(change.NewPosition);
-                var buffer = line.Snapshot.TextBuffer;
+                // TODO: only kick in for single line?
+                var firstLine = e.After.GetLineNumberFromPosition(change.NewPosition);
+                var lastLine = e.After.GetLineNumberFromPosition(change.NewEnd);
 
-                if (line.Length < LineLimit)
+                for (var lineNumber = firstLine; lineNumber <= lastLine; lineNumber++)
                 {
-                    continue;
-                }
-                // Check if the line ends with a comment...
-                var spans = this.classifier.GetClassificationSpans(line.Extent);
+                    var line = e.After.GetLineFromLineNumber(lineNumber);
+                    var snapshot = line.Snapshot;
+                    var buffer = snapshot.TextBuffer;
 
-                // If there are no spans, or the last span isn't a comment
-                // (multi-line issues?), or if the comment begins *after* the
-                // LineLimit, don't even attempt to wrap...
-                var comment = (spans != null) ? spans.LastOrDefault() : null;
+                    // Get the line comment info for the previous, current, and next
+                    // lines...
+                    LineCommentInfo prevInfo = null;
+                    LineCommentInfo info = null;
+                    LineCommentInfo nextInfo = null;
 
-                if (comment == null ||
-                    !comment.ClassificationType.IsOfType("comment"))
-                {
-                    continue;
-                }
+                    info = LineCommentInfo.FromLine(line, this.classifier);
 
-                var commentStartColumn = comment.Span.Start - line.Start;
-
-                if (commentStartColumn >= LineLimit)
-                {
-                    continue;
-                }
-
-                // We now know we've got a comment that extends across our limit...
-                // look for an matching comment on the next line.  If there isn't
-                // one, we'll have to create a new line...
-                var needNewLine = false;
-                SnapshotPoint wrapPoint = new SnapshotPoint();
-                if (line.Snapshot.LineCount <= line.LineNumber + 1)
-                {
-                    needNewLine = true;
-                }
-                else
-                {
-                    var nextLine = line.Snapshot.GetLineFromLineNumber(line.LineNumber + 1);
-                    var nextSpans = this.classifier.GetClassificationSpans(nextLine.Extent);
-
-                    // If there are no spans, or the last span isn't a comment
-                    // (multi-line issues?), or if the comment starts in a different
-                    // place, it's not a candidate.
-                    var nextComment = (nextSpans != null) ? nextSpans.LastOrDefault() : null;
-
-                    if (nextComment == null ||
-                        !nextComment.ClassificationType.IsOfType("comment") ||
-                        nextComment.Span.Start - nextLine.Start != commentStartColumn)
+                    if (info == null)
                     {
-                        needNewLine = true;
+                        continue;
                     }
-                    else
+
+                    if (line.LineNumber > 0)
                     {
-                        // We've got a matching comment, so inject there!
-                        wrapPoint = nextComment.Span.Start + 3;  // TODO: fix padding!
+                        prevInfo = LineCommentInfo.FromLine(
+                            snapshot.GetLineFromLineNumber(line.LineNumber - 1),
+                            this.classifier);
                     }
+
+                    if (line.LineNumber + 1 < snapshot.LineCount)
+                    {
+                        nextInfo = LineCommentInfo.FromLine(
+                            snapshot.GetLineFromLineNumber(line.LineNumber + 1),
+                            this.classifier);
+                    }
+
+                    // TODO: Check to see if we need to back-fill to the previous line?
+
+                    // Check to see if we need to wrap to the next line.
+                    if (info.Line.Length < LineLimit ||
+                        info.ContentSpan.Start - info.Line.Start >= LineLimit)
+                    {
+                        continue;
+                    }
+
+                    // Figure out what text we'll be wrapping to the next line...
+                    // Find the last whitespace before limit and wrap...
+                    var text = info.ContentSpan.GetText();
+                    var contentStartColumn = info.ContentSpan.Start - info.Line.Start;
+                    var wrapIndex = text.LastIndexOfAny(Whitespace, LineLimit - contentStartColumn - 1);
+                    var wrapPoint = info.ContentSpan.Start + wrapIndex;
+                    var toWrap = text.Substring(wrapIndex + 1); // TODO: trim extra whitespace?
+
+                    if (!buffer.CheckEditAccess())
+                    {
+                        continue;
+                    }
+
+                    using (var edit = buffer.CreateEdit())
+                    {
+                        edit.Delete(Span.FromBounds(wrapPoint, info.ContentSpan.End));
+
+                        // If we need to wrap, check to see if the next line looks like
+                        // a continuation of the current line.
+                        if (info.Matches(nextInfo))
+                        {
+                            var postWordWhitespace = " ";
+
+                            if (toWrap.EndsWith(".") || toWrap.EndsWith("!") || toWrap.EndsWith("?"))
+                            {
+                                postWordWhitespace = "  ";
+                            }
+
+                            edit.Insert(
+                                nextInfo.ContentSpan.Start.Position,
+                                string.Concat(toWrap, postWordWhitespace));
+                        }
+                        else
+                        {
+                            // we need a new line!
+                            var leadingWhitespace = string.Empty;
+
+                            if (info.MarkerSpan.Start > info.Line.Start)
+                            {
+                                leadingWhitespace = new string(' ', info.MarkerSpan.Start - info.Line.Start);
+                            }
+
+                            var postMarkerWhitespace = new SnapshotSpan(info.MarkerSpan.End, info.ContentSpan.Start).GetText();
+
+                            edit.Insert(
+                                info.Line.End.Position,
+                                string.Concat("\r\n", leadingWhitespace, info.MarkerSpan.GetText(), postMarkerWhitespace, toWrap));
+                        }
+
+                        edit.Apply();
+                    }
+
+                    // TODO: check to see if the caret/selection needs to be updated,
+                    // because we might have just moved the text behind it to the
+                    // next line... (no longer needed... this should trigger an
+                    // additional change...
                 }
-
-                // Find the last whitespace before limit and wrap...
-                var text = line.GetText();
-                var lastIndex = text.LastIndexOfAny(Whitespace, LineLimit - 1);
-                var toWrap = text.Substring(lastIndex + 1);
-                // TODO: find the non-whitespace end of the line...
-
-                if (buffer.CheckEditAccess())
-                {
-                    var edit = buffer.CreateEdit();
-                    // Use ".Position" so that the locations aren't shifted as
-                    // we make changes to the new snapshot!
-                    edit.Delete(line.Start.Position + lastIndex, toWrap.Length + 1);
-
-                    if (needNewLine)
-                    {
-                        // TODO: Do we need to add line-break to the current line too?
-                        edit.Insert(line.EndIncludingLineBreak.Position,
-                            string.Concat("// ", toWrap, line.GetLineBreakText()));
-                    }
-                    else
-                    {
-                        edit.Insert(wrapPoint.Position,
-                            string.Concat(toWrap, " "));
-                    }
-                    edit.Apply();
-                }
-
-                // TODO: check to see if the caret/selection needs to be updated,
-                // because we might have just moved the text behind it to the
-                // next line... (no longer needed... this should trigger an
-                // additional change...
             }
         }
     }

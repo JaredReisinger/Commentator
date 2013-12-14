@@ -132,7 +132,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AutoWrap\AutoWrapper.cs" />
+    <Compile Include="AutoWrap\LineCommentInfo.cs" />
     <Compile Include="AutoWrap\ViewListener.cs" />
+    <Compile Include="Extensions.cs" />
     <Compile Include="Guids.cs" />
     <Compile Include="Resources.Designer.cs">
       <AutoGen>True</AutoGen>
