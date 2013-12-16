@@ -13,13 +13,16 @@ namespace Spudnoggin.Commontator.AutoWrap
 {
     sealed class AutoWrapper : IDisposable
     {
+        private GeneralOptions options;
         private IWpfTextView view;
         private IClassifierAggregatorService aggregator;
         private IClassifier classifier;
 
-        const int LineLimit = 40;   // short for testing!
         public AutoWrapper(IWpfTextView textView, IClassifierAggregatorService aggregator)
         {
+            var service = (CommontatorService)Microsoft.VisualStudio.Shell.ServiceProvider.GlobalProvider.GetService(typeof(CommontatorService));
+            this.options = service.GetOptions();
+
             this.view = textView;
             this.aggregator = aggregator;
             this.classifier = aggregator.GetClassifier(this.view.TextBuffer);
@@ -37,6 +40,11 @@ namespace Spudnoggin.Commontator.AutoWrap
 
         void TextBuffer_Changed(object sender, Microsoft.VisualStudio.Text.TextContentChangedEventArgs e)
         {
+            if (!this.options.AutoWrapEnabled)
+            {
+                return;
+            }
+
             // The auto-wrap should only apply during simple typing.  Region
             // edits (simultaneous multi-line typing) could lead to truly bizarre
             // wrapping behavior, so it really doesn't make sense.
@@ -78,10 +86,10 @@ namespace Spudnoggin.Commontator.AutoWrap
                 return;
             }
 
-            var commentWrapLength = LineLimit - (info.ContentSpan.Start - info.Line.Start);
+            var commentWrapLength = this.options.AutoWrapColumn - (info.ContentSpan.Start - info.Line.Start);
 
             // There's some minimum length after which wrapping becomes pointless...
-            if (commentWrapLength < 10)
+            if (commentWrapLength < this.options.MinimumWrapWidth)
             {
                 return;
             }

@@ -131,6 +131,10 @@
     </COMReference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CommontatorService.cs" />
+    <Compile Include="GeneralOptions.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="AutoWrap\AutoWrapper.cs" />
     <Compile Include="AutoWrap\LineCommentInfo.cs" />
     <Compile Include="AutoWrap\ViewListener.cs" />

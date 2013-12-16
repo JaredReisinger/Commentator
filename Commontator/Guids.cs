@@ -10,5 +10,7 @@ namespace Spudnoggin.Commontator
         public const string guidCommontatorCmdSetString = "757260c9-0fbd-4ce3-a50b-2e0803d1d766";
 
         public static readonly Guid guidCommontatorCmdSet = new Guid(guidCommontatorCmdSetString);
+
+        public const string CommontatorServiceString = "e0cacd03-d64f-4e01-aea4-633c0df2265d";
     };
 }
