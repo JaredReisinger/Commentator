@@ -4,6 +4,7 @@ using System.ComponentModel.Composition;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Text.Editor;
@@ -11,34 +12,35 @@ using Microsoft.VisualStudio.Utilities;
 
 namespace Spudnoggin.Commontator.AutoWrap
 {
-    sealed class AutoWrapper : IDisposable
+    internal class AutoWrapper
     {
         private GeneralOptions options;
         private IWpfTextView view;
-        private IClassifierAggregatorService aggregator;
         private IClassifier classifier;
+        private SnapshotPoint newCaretPoint = default(SnapshotPoint);
 
-        public AutoWrapper(IWpfTextView textView, IClassifierAggregatorService aggregator)
+        public AutoWrapper(SVsServiceProvider serviceProvider, IClassifierAggregatorService aggregatorService, IWpfTextView textView)
         {
-            var service = (CommontatorService)Microsoft.VisualStudio.Shell.ServiceProvider.GlobalProvider.GetService(typeof(CommontatorService));
+            var service = serviceProvider.GetService<CommontatorService>();
             this.options = service.GetOptions();
 
             this.view = textView;
-            this.aggregator = aggregator;
-            this.classifier = aggregator.GetClassifier(this.view.TextBuffer);
+            this.classifier = aggregatorService.GetClassifier(this.view.TextBuffer);
 
-            this.view.TextBuffer.Changed += TextBuffer_Changed;
+            this.view.TextBuffer.Changed += this.TextBuffer_Changed;
+            this.view.Closed += this.View_Closed;
         }
 
-        public void Dispose()
+        void View_Closed(object sender, EventArgs e)
         {
-            this.view.TextBuffer.Changed -= TextBuffer_Changed;
+            this.view.TextBuffer.Changed -= this.TextBuffer_Changed;
+            this.view.Closed -= this.View_Closed;
         }
 
-        readonly char[] Whitespace = new char[] { ' ', '\t' };
+        readonly char[] Whitespace = new char[] { ' ', '\t', '\r', '\n' };
         readonly char[] DoubleSpace = new char[] { '.', '?', '!' };
 
-        void TextBuffer_Changed(object sender, Microsoft.VisualStudio.Text.TextContentChangedEventArgs e)
+        private void TextBuffer_Changed(object sender, TextContentChangedEventArgs e)
         {
             if (!this.options.AutoWrapEnabled)
             {
@@ -55,19 +57,18 @@ namespace Spudnoggin.Commontator.AutoWrap
 
             var snapshot = e.After;
             var change = e.Changes[0];
+            var buffer = snapshot.TextBuffer;
+            var caret = this.view.Caret.Position;  // caret is in *old* snapshot, typically(!?)
+            var caretPosition = caret.Point.GetPoint(snapshot, caret.Affinity).GetValueOrDefault();
 
-            // If we just typed a space at the *end* of the line, don't do any
-            // wrapping yet.  (It will cause us to trim the trailing space, which
-            // would makeeverythingruntogetherlikethis!
-            if (change.Delta == 1 &&
-                change.OldLength == 0 &&
-                change.NewLength == 1 &&
-                Whitespace.Contains(change.NewText[0]))
+            // If the caret isn't near the change, this was an undo, or other operation
+            // we shouldn't wrap on!
+            if ((caretPosition.Snapshot != snapshot) ||
+                (caretPosition < change.NewPosition) ||
+                (caretPosition > change.NewEnd))
             {
                 return;
             }
-            
-            var buffer = snapshot.TextBuffer;
 
             if (!buffer.CheckEditAccess())
             {
@@ -81,7 +82,18 @@ namespace Spudnoggin.Commontator.AutoWrap
             var line = snapshot.GetLineFromLineNumber(firstLine);
             var info = LineCommentInfo.FromLine(line, this.classifier);
 
-            if (info == null)
+            if (info == null || (!info.CommentOnly && !this.options.CodeWrapEnabled))
+            {
+                return;
+            }
+
+            // If we just typed whitespace at the *end* of the line, don't do any
+            // wrapping yet.  (It will cause us to trim the trailing space, which
+            // would makeeverythingruntogetherlikethis!  It also makes newline
+            // handling weird.)
+            if ((change.Delta > 0) &&
+                ((change.NewSpan.End >= line.End) && (change.NewSpan.End <= line.EndIncludingLineBreak)) &&
+                change.NewText.All(c => Whitespace.Contains(c)))
             {
                 return;
             }
@@ -120,11 +132,19 @@ namespace Spudnoggin.Commontator.AutoWrap
             // of the change...
             comments.Add(info);
 
+            // Figure out the relative position of the caret within the comment
+            // content.  We'll need this to dead-reckon the final location the
+            // caret should have.
+            var caretContentOffset = caretPosition - info.ContentSpan.Start;
+            var caretCommentIndex = 0;
+
             for (var lineNumber = firstLine + 1; lineNumber < snapshot.LineCount; lineNumber++)
             {
                 line = snapshot.GetLineFromLineNumber(lineNumber);
                 info = LineCommentInfo.FromLine(line, this.classifier);
 
+                // TODO: treat lines with code (non-comment) as non-matching
+                // so that behavior is better?
                 if (!comments[0].Matches(info))
                 {
                     break;
@@ -145,7 +165,9 @@ namespace Spudnoggin.Commontator.AutoWrap
                     break;
                 }
 
+                firstLine = lineNumber;
                 comments.Insert(0, info);
+                caretCommentIndex++;
             }
 
             // Now build of a list of "properly wrapped" text for the entire
@@ -161,20 +183,36 @@ namespace Spudnoggin.Commontator.AutoWrap
                 {
                     var wrappingWhitespace = " ";
 
-                    if (DoubleSpace.Contains(builder[builder.Length-1]))
+                    if (DoubleSpace.Contains(builder[builder.Length - 1]))
                     {
                         wrappingWhitespace = "  ";
                     }
 
                     builder.Append(wrappingWhitespace);
+
+                    if (caretCommentIndex >= 0)
+                    {
+                        caretContentOffset += wrappingWhitespace.Length;
+                    }
                 }
 
-                builder.Append(comment.ContentSpan.GetText().Trim());
+                var text = comment.ContentSpan.GetText().Trim();
+                builder.Append(text);
+
+                if (caretCommentIndex > 0)
+                {
+                    caretContentOffset += text.Length;
+                }
+
+                caretCommentIndex--;
             }
 
             // Now update all of the comment spans in the range...
             using (var edit = buffer.CreateEdit())
             {
+                var caretLineOffset = 0;
+                var caretPositionOffset = 0;
+
                 foreach (var comment in comments)
                 {
                     if (builder.Length > 0)
@@ -198,16 +236,44 @@ namespace Spudnoggin.Commontator.AutoWrap
                             // Only replace if we ended up with different text...
                             final = candidate.Substring(0, end);
 
-                            builder.Remove(0, end); // would be +1, but the force-wrap kills this...
-                            if (Whitespace.Contains(builder[0]))
+                            while ((builder.Length > end) && Whitespace.Contains(builder[end]))
                             {
-                                builder.Remove(0, 1);
+                                end++;
+                            }
+
+                            // Remove the line and any trailing whitespace
+                            builder.Remove(0, end);
+
+                            if (end < caretContentOffset)
+                            {
+                                caretContentOffset -= end;
+                                caretLineOffset++;
+                            }
+                            else if (final.Length < caretContentOffset)
+                            {
+                                // The caret was in the trailing whitespace...
+                                // should we advance to the next line, or
+                                // leave it at the end of the current line?
+                                caretPositionOffset = final.Length;
+                                caretContentOffset = -1;
+
+                            }
+                            else if (caretContentOffset > -1)
+                            {
+                                caretPositionOffset = caretContentOffset;
+                                caretContentOffset = -1;
                             }
                         }
                         else
                         {
                             final = builder.ToString();
                             builder.Clear();
+
+                            if (caretContentOffset > -1)
+                            {
+                                caretPositionOffset = caretContentOffset;
+                                caretContentOffset = -1;
+                            }
                         }
 
                         if (final.Length != comment.ContentSpan.Length ||
@@ -218,8 +284,13 @@ namespace Spudnoggin.Commontator.AutoWrap
                     }
                     else
                     {
-                        if (comment.ContentSpan.Length > 0)
+                        if (comment.CommentOnly)
                         {
+                            edit.Delete(comment.Line.Start, comment.Line.LengthIncludingLineBreak);
+                        }
+                        else if (comment.ContentSpan.Length > 0)
+                        {
+                            // Should we leave the marker, or take it out?
                             edit.Delete(comment.ContentSpan.Span);
                         }
                     }
@@ -250,16 +321,43 @@ namespace Spudnoggin.Commontator.AutoWrap
 
                             final = candidate.Substring(0, end);
 
-                            builder.Remove(0, end); // would be +1, but the force-wrap kills this...
-                            if (Whitespace.Contains(builder[0]))
+                            while ((builder.Length > end) && Whitespace.Contains(builder[end]))
                             {
-                                builder.Remove(0, 1);
+                                end++;
+                            }
+
+                            builder.Remove(0, end);
+
+                            if (end < caretContentOffset)
+                            {
+                                caretContentOffset -= end;
+                                caretLineOffset++;
+                            }
+                            else if (final.Length < caretContentOffset)
+                            {
+                                // The caret was in the trailing whitespace...
+                                // should we advance to the next line, or
+                                // leave it at the end of the current line?
+                                caretPositionOffset = final.Length;
+                                caretContentOffset = -1;
+
+                            }
+                            else if (caretContentOffset > -1)
+                            {
+                                caretPositionOffset = caretContentOffset;
+                                caretContentOffset = -1;
                             }
                         }
                         else
                         {
                             final = builder.ToString();
                             builder.Clear();
+
+                            if (caretContentOffset > -1)
+                            {
+                                caretPositionOffset = caretContentOffset;
+                                caretContentOffset = -1;
+                            }
                         }
 
                         // Create a new line...
@@ -271,24 +369,61 @@ namespace Spudnoggin.Commontator.AutoWrap
                     }
 
                     edit.Insert(
-                            comments.Last().Line.End.Position,
-                            newLines.ToString());
+                        comments.Last().Line.End.Position,
+                        newLines.ToString());
                 }
 
                 if (edit.HasEffectiveChanges)
                 {
-                    edit.Apply();
+                    var newSnapshot = edit.Apply();
+
+                    // Try to set the new caret position...
+                    var newCaretLine = newSnapshot.GetLineFromLineNumber(firstLine + caretLineOffset);
+                    info = LineCommentInfo.FromLine(newCaretLine, this.classifier);
+                    this.newCaretPoint = info.ContentSpan.Start + caretPositionOffset;
+
+                    // We will need to update the caret to the new location, but
+                    // we can't do that until the view updates to the new snapshot
+                    // that contains the changes.
+                    this.view.LayoutChanged += UpdateCaretEventually;
                 }
                 else
                 {
                     edit.Cancel();
                 }
             }
-            
+
             // TODO: check to see if the caret/selection needs to be updated,
             // because we might have just moved the text behind it to the
             // next line... (no longer needed... this should trigger an
             // additional change...
+        }
+
+        private void UpdateCaretEventually(object sender, TextViewLayoutChangedEventArgs e)
+        {
+            var removeHandler = true;
+
+            if (!this.newCaretPoint.Equals(default(SnapshotPoint)))
+            {
+                var layoutVersion = e.NewSnapshot.Version.VersionNumber;
+                var caretVersion = this.newCaretPoint.Snapshot.Version.VersionNumber;
+
+                if (layoutVersion < caretVersion)
+                {
+                    removeHandler = false;
+
+                }
+                if (layoutVersion == caretVersion)
+                {
+                    this.view.Caret.MoveTo(newCaretPoint);
+                }
+            }
+
+            if (removeHandler)
+            {
+                this.view.LayoutChanged -= this.UpdateCaretEventually;
+
+            }
         }
     }
 }

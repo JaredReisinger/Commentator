@@ -24,31 +24,34 @@ namespace Spudnoggin.Commontator.AutoWrap
         MultiLineEnd,
     }
 
-    [DebuggerDisplay("(@{Line.LineNumber}, {Span.Start-Line.Start} {CommentStyles}) {Span.GetText()}")]
+    [DebuggerDisplay("(@{Line.LineNumber}, {CommentSpan.Start-Line.Start} {CommentStyles}) {CommentSpan.GetText()}")]
     class LineCommentInfo
     {
         readonly char[] Whitespace = new char[] { ' ', '\t' };
         readonly char[] FormatMarkers = new char[] { '+', '-', '!', '?' };
 
-        private LineCommentInfo(ITextSnapshotLine line, SnapshotSpan span)
+        private LineCommentInfo(ITextSnapshotLine line, IList<ClassificationSpan> spans, SnapshotSpan commentSpan)
         {
             this.Line = line;
-            this.Span = span;
+            this.CommentSpan = commentSpan;
+            this.CommentOnly = spans.Count == 1;    // what about leading whitespace?
+
+            var commentStart = this.CommentSpan.Start;
 
             // Is there a reliable way to detect we're inside a multi-line comment?
             // for now, we assume single-line...
-            var text = span.GetText();
+            var text = this.CommentSpan.GetText();
 
             if (text.StartsWith("////") || text.StartsWith("''''"))
             {
                 // A code-comment, probably *shouldn't* be wrapped!
                 this.Style = CommentStyle.CodeComment;
-                this.MarkerSpan = new SnapshotSpan(span.Start, 4);
+                this.MarkerSpan = new SnapshotSpan(commentStart, 4);
             }
             else if (text.StartsWith("///") || text.StartsWith("'''"))
             {
                 this.Style = CommentStyle.DocComment;
-                this.MarkerSpan = new SnapshotSpan(span.Start, 3);
+                this.MarkerSpan = new SnapshotSpan(commentStart, 3);
             }
             else if (text.StartsWith("//") || text.StartsWith("''"))
             {
@@ -59,7 +62,7 @@ namespace Spudnoggin.Commontator.AutoWrap
                 // of the marker...
                 var extra = text.Skip(2).TakeWhile(c => FormatMarkers.Contains(c)).Count();
 
-                this.MarkerSpan = new SnapshotSpan(span.Start, 2 + extra);
+                this.MarkerSpan = new SnapshotSpan(commentStart, 2 + extra);
             }
             else if (text.StartsWith("/*"))
             {
@@ -70,20 +73,21 @@ namespace Spudnoggin.Commontator.AutoWrap
                 // of the marker...
                 var extra = text.Skip(2).TakeWhile(c => FormatMarkers.Contains(c)).Count();
 
-                this.MarkerSpan = new SnapshotSpan(span.Start, 2 + extra);
+                this.MarkerSpan = new SnapshotSpan(commentStart, 2 + extra);
             }
             else if ((text.StartsWith("/") || text.StartsWith("'")) &&
-                    (span.Start > line.Start) &&
-                    ((span.Start - 1).GetChar() == span.Start.GetChar()))
+                    (commentStart > line.Start) &&
+                    ((commentStart - 1).GetChar() == commentStart.GetChar()))
             {
                 // Weird case where the classifier gives a bogus result when typing
                 // the "//" at the beginning of the line... perhaps we should *not*
                 // wrap in this case?
 
                 // Treat like "//" or "''" comment... but fix the span up!
-                span = new SnapshotSpan(span.Start - 1, span.End);
-                this.Span = span;
-                text = span.GetText();
+                this.CommentSpan = new SnapshotSpan(commentStart - 1, this.CommentSpan.End);
+                commentSpan = this.CommentSpan;
+                commentStart = this.CommentSpan.Start;
+                text = this.CommentSpan.GetText();
 
                 this.Style = CommentStyle.SingleLine;
 
@@ -92,20 +96,20 @@ namespace Spudnoggin.Commontator.AutoWrap
                 // of the marker...
                 var extra = text.Skip(2).TakeWhile(c => FormatMarkers.Contains(c)).Count();
 
-                this.MarkerSpan = new SnapshotSpan(span.Start, 2 + extra);
+                this.MarkerSpan = new SnapshotSpan(commentStart, 2 + extra);
             }
             else
             {
                 // We must be a continuation?
                 this.Style = CommentStyle.MultiLineContinuation;
-                this.MarkerSpan = new SnapshotSpan(span.Start, 0);
+                this.MarkerSpan = new SnapshotSpan(commentStart, 0);
             }
 
             // Determine the post-marker whitespace (if any).
             var space = text.Skip(this.MarkerSpan.Length).TakeWhile(c => Whitespace.Contains(c)).Count();
-            this.ContentSpan = new SnapshotSpan(span.Start + this.MarkerSpan.Length + space, span.End);
+            this.ContentSpan = new SnapshotSpan(commentStart + this.MarkerSpan.Length + space, this.CommentSpan.End);
 
-            ////var commentStartColumn = span.Span.Start - line.Start;
+            ////var commentStartColumn = this.CommentSpan.CommentSpan.Start - line.Start;
         }
 
         public static LineCommentInfo FromLine(ITextSnapshotLine line, IClassifier classifier)
@@ -123,7 +127,7 @@ namespace Spudnoggin.Commontator.AutoWrap
                 return null;
             }
 
-            var info = new LineCommentInfo(line, span.Span);
+            var info = new LineCommentInfo(line, spans, span.Span);
             return info;
         }
 
@@ -160,10 +164,10 @@ namespace Spudnoggin.Commontator.AutoWrap
         }
 
         public ITextSnapshotLine Line { get; private set; }
-        public SnapshotSpan Span { get; private set; }
+        public SnapshotSpan CommentSpan { get; private set; }
         public CommentStyle Style { get; private set; }
         public SnapshotSpan MarkerSpan { get; private set; }
         public SnapshotSpan ContentSpan { get; private set; }
-        public int MyProperty { get; private set; }
+        public bool CommentOnly { get; private set; }
     }
 }

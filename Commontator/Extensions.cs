@@ -9,10 +9,15 @@ namespace Spudnoggin.Commontator
 {
     public static class Extensions
     {
-        ////public static int StartColumn(this SnapshotSpan span)
-        ////{
-        ////    var line = span.Snapshot.GetLineFromPosition(span.Start);
-        ////    return span.Start - line.Start;
-        ////}
+        public static T GetService<T>(this IServiceProvider serviceProvider)
+        {
+            return serviceProvider.GetService<T,T>();
+        }
+
+        public static TResult GetService<T, TResult>(this IServiceProvider serviceProvider)
+            where T : TResult   // is this, in fact, always true?
+        {
+            return (TResult)serviceProvider.GetService(typeof(T));
+        }
     }
 }

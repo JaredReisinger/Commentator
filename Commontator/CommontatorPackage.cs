@@ -12,7 +12,7 @@ using Microsoft.VisualStudio.Shell;
 namespace Spudnoggin.Commontator
 {
     [PackageRegistration(UseManagedResourcesOnly = true)]
-    [InstalledProductRegistration("#110", "#112", "0.1.xxx", IconResourceID = 400)]
+    [InstalledProductRegistration("#110", "#112", "0.1.2013.1217", IconResourceID = 400)]
     [ProvideOptionPage(typeof(GeneralOptions), "Commontator", "General", 200, 201, false, 202)]
     [ProvideService(typeof(CommontatorService))]
     [Guid(GuidList.guidCommontatorPkgString)]
