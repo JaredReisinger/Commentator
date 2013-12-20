@@ -160,7 +160,6 @@ namespace Spudnoggin.Commontator.AutoWrap
             }
 
             return false;
-
         }
 
         public ITextSnapshotLine Line { get; private set; }

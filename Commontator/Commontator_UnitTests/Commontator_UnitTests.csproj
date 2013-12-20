@@ -36,6 +36,8 @@
     <SignAssembly>true</SignAssembly>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.QualityTools.Testing.Fakes, Version=11.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
+    <Reference Include="Microsoft.VisualStudio.CoreUtility, Version=11.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
     <Reference Include="Microsoft.VisualStudio.OLE.Interop" />
     <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
     <Reference Include="Microsoft.VisualStudio.Shell.11.0, Version=11.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
@@ -49,6 +51,14 @@
     <Reference Include="Microsoft.VisualStudio.Shell.Immutable.10.0" />
     <Reference Include="Microsoft.VisualStudio.Shell.Immutable.11.0" />
     <!---->
+    <Reference Include="Microsoft.VisualStudio.Text.Data, Version=11.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
+    <Reference Include="Microsoft.VisualStudio.Text.Data.11.0.0.0.Fakes">
+      <HintPath>FakesAssemblies\Microsoft.VisualStudio.Text.Data.11.0.0.0.Fakes.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.VisualStudio.Text.Logic, Version=11.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
+    <Reference Include="Microsoft.VisualStudio.Text.Logic.11.0.0.0.Fakes">
+      <HintPath>FakesAssemblies\Microsoft.VisualStudio.Text.Logic.11.0.0.0.Fakes.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.VSSDK.UnitTestLibrary" />
     <Reference Include="Microsoft.VSSDK.TestHostFramework" />
     <Reference Include="System" />
@@ -59,11 +69,16 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="PackageTest.cs" />
+    <Compile Include="LineCommentInfoTest.cs" />
+    <Compile Include="SimpleLine.cs" />
+    <Compile Include="SimpleSnapshot.cs" />
     <!---->
     <!---->
     <!---->
   </ItemGroup>
   <ItemGroup>
+    <Fakes Include="Fakes\Microsoft.VisualStudio.Text.Data.fakes" />
+    <Fakes Include="Fakes\Microsoft.VisualStudio.Text.Logic.fakes" />
     <None Include="Key.snk" />
   </ItemGroup>
   <ItemGroup>
