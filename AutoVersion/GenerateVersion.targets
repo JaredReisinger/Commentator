@@ -51,7 +51,7 @@
             AssemblyCopyright="Copyright (c) $(Year) Jared Reisinger"
             AssemblyTrademark=""
             ComVisible="false"
-            CLSCompliant="true"
+            CLSCompliant="false"
             AssemblyVersion="$(MajorMinorBuildVersion)"
             AssemblyFileVersion="$(MajorMinorBuildVersion)"
             AssemblyInformationalVersion="$(MajorMinorBuildVersion) / $(Branch) / $(CommitHash)" />
@@ -59,6 +59,9 @@
         <ItemGroup>
             <ReplacementToken Include="MajorMinorBuildVersion">
                 <ReplacementValue>$(MajorMinorBuildVersion)</ReplacementValue>
+            </ReplacementToken>
+            <ReplacementToken Include="InformationalVersion">
+                <ReplacementValue>$(MajorMinorBuildVersion) / $(Branch) / $(CommitHash)</ReplacementValue>
             </ReplacementToken>
             <ReplacementToken Include="Publisher">
                 <ReplacementValue>Jared Reisinger</ReplacementValue>
@@ -74,6 +77,11 @@
         <TemplateFile
             Template="source.extension.vsixmanifest.template"
             OutputFilename="source.extension.vsixmanifest"
+            Tokens="@(ReplacementToken)" />
+
+        <TemplateFile
+            Template="GeneratedConstants.cs.template"
+            OutputFilename="GeneratedConstants.cs"
             Tokens="@(ReplacementToken)" />
 
     </Target>

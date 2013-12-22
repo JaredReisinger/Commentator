@@ -15,9 +15,9 @@
 [assembly: System.Reflection.AssemblyProduct("Commontator")]
 [assembly: System.Reflection.AssemblyCopyright("Copyright (c) 2013 Jared Reisinger")]
 [assembly: System.Runtime.InteropServices.ComVisible(false)]
-[assembly: System.CLSCompliant(true)]
-[assembly: System.Reflection.AssemblyVersion("0.0.1")]
-[assembly: System.Reflection.AssemblyFileVersion("0.0.1")]
-[assembly: System.Reflection.AssemblyInformationalVersion("0.0.1 / master / 60c1d877b076754d6252ab17bf429c1bf29e1917")]
+[assembly: System.CLSCompliant(false)]
+[assembly: System.Reflection.AssemblyVersion("0.0.2")]
+[assembly: System.Reflection.AssemblyFileVersion("0.0.2")]
+[assembly: System.Reflection.AssemblyInformationalVersion("0.0.2 / master / 0c90d20d53d40fe0346294b83ad2b76a217711c7")]
 
 

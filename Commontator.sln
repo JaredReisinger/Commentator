@@ -4,6 +4,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 12.0.21005.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Commontator", "Commontator\Commontator.csproj", "{D0777B17-E20B-4AC2-A7CC-4D7A33FB0780}"
+	ProjectSection(ProjectDependencies) = postProject
+		{CCEEBF46-FDAE-4BF5-9C12-6800F7B2BA2B} = {CCEEBF46-FDAE-4BF5-9C12-6800F7B2BA2B}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Commontator_IntegrationTests", "Commontator\Commontator_IntegrationTests\Commontator_IntegrationTests.csproj", "{EACBC43E-DD0C-4285-AA1F-59224B640872}"
 EndProject

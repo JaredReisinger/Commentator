@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
     <Metadata>
-        <Identity Id="8c308e81-b885-44b1-b2c6-f8b3e14cc6c3" Version="0.0.1" Language="en-US" Publisher="Jared Reisinger" />
+        <Identity Id="8c308e81-b885-44b1-b2c6-f8b3e14cc6c3" Version="0.0.2" Language="en-US" Publisher="Jared Reisinger" />
         <DisplayName>Commentator</DisplayName>
         <Description>Advanced comment behavior for Visual Studio</Description>
     </Metadata>

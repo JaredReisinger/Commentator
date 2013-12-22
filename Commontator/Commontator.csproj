@@ -134,6 +134,9 @@
     <Compile Include="..\AutoVersion\AssemblyInfo.Generated.cs">
       <Link>Properties\AssemblyInfo.Generated.cs</Link>
     </Compile>
+    <Compile Include="..\AutoVersion\GeneratedConstants.cs">
+      <Link>GeneratedConstants.cs</Link>
+    </Compile>
     <Compile Include="CommontatorService.cs" />
     <Compile Include="GeneralOptions.cs">
       <SubType>Component</SubType>
