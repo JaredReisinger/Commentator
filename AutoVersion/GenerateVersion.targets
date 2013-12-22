@@ -1,0 +1,80 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="12.0">
+
+    <PropertyGroup>
+        <MSBuildCommunityTasksPath>$(SolutionDir)\.build</MSBuildCommunityTasksPath>
+    </PropertyGroup>
+
+    <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
+    <Import Project="$(SolutionDir)\.build\MSBuild.Community.Tasks.targets" />
+
+    <PropertyGroup>
+        <CompileDependsOn>
+            GenerateVersion;
+            $(CompileDependsOn);
+        </CompileDependsOn>
+    </PropertyGroup>
+    
+    <Target Name="GenerateVersion">
+        <Message Importance="high" Text="RUNNING OUR VERSION TARGET!" />
+
+        <Time>
+            <Output TaskParameter="Year" PropertyName="Year" />
+        </Time>
+
+        <GitDescribe
+            ToolPath="C:\Program Files (x86)\SmartGitHg\git\bin">
+            <Output TaskParameter="Tag" PropertyName="Tag" />
+            <Output TaskParameter="CommitCount" PropertyName="CommitCount" />
+            <Output TaskParameter="CommitHash" PropertyName="CommitHash" />
+        </GitDescribe>
+            
+        <GitBranch
+            ToolPath="C:\Program Files (x86)\SmartGitHg\git\bin">
+            <Output TaskParameter="Branch" PropertyName="Branch" />
+        </GitBranch>
+        
+        <!-- Strip the leading "v" from the Tag... -->
+        <PropertyGroup>
+            <MajorMinorVersion>$(Tag.TrimStart("v"))</MajorMinorVersion>
+            <MajorMinorBuildVersion>$(MajorMinorVersion).$(CommitCount)</MajorMinorBuildVersion>
+        </PropertyGroup>
+
+        <AssemblyInfo
+            CodeLanguage="CS"  
+            OutputFile="AssemblyInfo.Generated.cs"
+            AssemblyTitle="Commentator"
+            AssemblyDescription="Advanced comment behavior for Visual Studio"
+            AssemblyConfiguration="$(Configuration)"
+            AssemblyCompany="Jared Reisinger"
+            AssemblyProduct="Commontator"
+            AssemblyCopyright="Copyright (c) $(Year) Jared Reisinger"
+            AssemblyTrademark=""
+            ComVisible="false"
+            CLSCompliant="true"
+            AssemblyVersion="$(MajorMinorBuildVersion)"
+            AssemblyFileVersion="$(MajorMinorBuildVersion)"
+            AssemblyInformationalVersion="$(MajorMinorBuildVersion) / $(Branch) / $(CommitHash)" />
+
+        <ItemGroup>
+            <ReplacementToken Include="MajorMinorBuildVersion">
+                <ReplacementValue>$(MajorMinorBuildVersion)</ReplacementValue>
+            </ReplacementToken>
+            <ReplacementToken Include="Publisher">
+                <ReplacementValue>Jared Reisinger</ReplacementValue>
+            </ReplacementToken>
+            <ReplacementToken Include="Name">
+                <ReplacementValue>Commentator</ReplacementValue>
+            </ReplacementToken>
+            <ReplacementToken Include="Description">
+                <ReplacementValue>Advanced comment behavior for Visual Studio</ReplacementValue>
+            </ReplacementToken>
+        </ItemGroup>
+
+        <TemplateFile
+            Template="source.extension.vsixmanifest.template"
+            OutputFilename="source.extension.vsixmanifest"
+            Tokens="@(ReplacementToken)" />
+
+    </Target>
+</Project>

@@ -131,6 +131,9 @@
     </COMReference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\AutoVersion\AssemblyInfo.Generated.cs">
+      <Link>Properties\AssemblyInfo.Generated.cs</Link>
+    </Compile>
     <Compile Include="CommontatorService.cs" />
     <Compile Include="GeneralOptions.cs">
       <SubType>Component</SubType>
@@ -162,14 +165,14 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-    <None Include="source.extension.vsixmanifest">
-      <SubType>Designer</SubType>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <None Include="Key.snk" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\AutoVersion\source.extension.vsixmanifest">
+      <Link>source.extension.vsixmanifest</Link>
+    </None>
     <Content Include="Resources\Package.ico" />
   </ItemGroup>
   <PropertyGroup>

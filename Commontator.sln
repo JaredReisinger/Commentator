@@ -31,6 +31,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".build", ".build", "{282883
 		.build\MSBuild.Community.Tasks.targets = .build\MSBuild.Community.Tasks.targets
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoVersion", "AutoVersion\AutoVersion.csproj", "{CCEEBF46-FDAE-4BF5-9C12-6800F7B2BA2B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -49,6 +51,10 @@ Global
 		{AFB5BDD7-098A-4FE3-93C4-432EFF561651}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AFB5BDD7-098A-4FE3-93C4-432EFF561651}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AFB5BDD7-098A-4FE3-93C4-432EFF561651}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CCEEBF46-FDAE-4BF5-9C12-6800F7B2BA2B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CCEEBF46-FDAE-4BF5-9C12-6800F7B2BA2B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CCEEBF46-FDAE-4BF5-9C12-6800F7B2BA2B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CCEEBF46-FDAE-4BF5-9C12-6800F7B2BA2B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
