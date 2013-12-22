@@ -87,6 +87,12 @@ namespace Spudnoggin.Commontator.AutoWrap
                 return;
             }
 
+            // For now, we're only supporting single-line comments.
+            if (info.Style != CommentStyle.SingleLine)
+            {
+                return;
+            }
+
             // If we just typed whitespace at the *end* of the line, don't do any
             // wrapping yet.  (It will cause us to trim the trailing space, which
             // would makeeverythingruntogetherlikethis!  It also makes newline
