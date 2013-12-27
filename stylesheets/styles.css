@@ -101,6 +101,10 @@ header {
   position:fixed;
 }
 
+header h1 {
+  font-weight: bold;
+}
+
 header ul {
   list-style:none;
   height:40px;
