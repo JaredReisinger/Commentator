@@ -8,10 +8,10 @@ namespace AutoVersion
 {
     public static class GeneratedConstants
     {
-        public const string MajorMinorBuildVersion = "0.0.2";
+        public const string MajorMinorBuildVersion = "0.1.0";
         public const string Publisher = "Jared Reisinger";
         public const string Name = "Commentator";
         public const string Description = "Advanced comment behavior for Visual Studio";
-        public const string InformationalVersion = "0.0.2 / master / 0c90d20d53d40fe0346294b83ad2b76a217711c7";
+        public const string InformationalVersion = "0.1.0 / master / decdfde9728a5595674d7468683f4ca52b92ef37";
     }
 }

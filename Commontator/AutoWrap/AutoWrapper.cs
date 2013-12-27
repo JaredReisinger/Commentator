@@ -386,12 +386,15 @@ namespace Spudnoggin.Commontator.AutoWrap
                     // Try to set the new caret position...
                     var newCaretLine = newSnapshot.GetLineFromLineNumber(firstLine + caretLineOffset);
                     info = LineCommentInfo.FromLine(newCaretLine, this.classifier);
-                    this.newCaretPoint = info.ContentSpan.Start + caretPositionOffset;
+                    if (info != null)
+                    {
+                        this.newCaretPoint = info.ContentSpan.Start + caretPositionOffset;
 
-                    // We will need to update the caret to the new location, but
-                    // we can't do that until the view updates to the new snapshot
-                    // that contains the changes.
-                    this.view.LayoutChanged += UpdateCaretEventually;
+                        // We will need to update the caret to the new location, but
+                        // we can't do that until the view updates to the new snapshot
+                        // that contains the changes.
+                        this.view.LayoutChanged += UpdateCaretEventually;
+                    }
                 }
                 else
                 {

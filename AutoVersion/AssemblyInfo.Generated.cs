@@ -10,14 +10,14 @@
 
 [assembly: System.Reflection.AssemblyTitle("Commentator")]
 [assembly: System.Reflection.AssemblyDescription("Advanced comment behavior for Visual Studio")]
-[assembly: System.Reflection.AssemblyConfiguration("Debug")]
+[assembly: System.Reflection.AssemblyConfiguration("Release")]
 [assembly: System.Reflection.AssemblyCompany("Jared Reisinger")]
 [assembly: System.Reflection.AssemblyProduct("Commontator")]
 [assembly: System.Reflection.AssemblyCopyright("Copyright (c) 2013 Jared Reisinger")]
 [assembly: System.Runtime.InteropServices.ComVisible(false)]
 [assembly: System.CLSCompliant(false)]
-[assembly: System.Reflection.AssemblyVersion("0.0.2")]
-[assembly: System.Reflection.AssemblyFileVersion("0.0.2")]
-[assembly: System.Reflection.AssemblyInformationalVersion("0.0.2 / master / 0c90d20d53d40fe0346294b83ad2b76a217711c7")]
+[assembly: System.Reflection.AssemblyVersion("0.1.0")]
+[assembly: System.Reflection.AssemblyFileVersion("0.1.0")]
+[assembly: System.Reflection.AssemblyInformationalVersion("0.1.0 / master / decdfde9728a5595674d7468683f4ca52b92ef37")]
 
 

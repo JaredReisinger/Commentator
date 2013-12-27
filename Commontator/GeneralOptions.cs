@@ -27,7 +27,7 @@ namespace Spudnoggin.Commontator
 
         [Category("Automatic Wrapping")]
         [DisplayName("Wrapping column")]
-        [Description("The column at which comments will wrap.")]
+        [Description("The column after which comments will wrap.")]
         [DefaultValue(80)]
         public int AutoWrapColumn { get; set; }
 

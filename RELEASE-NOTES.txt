@@ -1,0 +1,10 @@
+Commentator Release Notes
+=========================
+
+
+
+
+v0.0
+----
+
+Test-build of auto-versioning system, not publically released.
