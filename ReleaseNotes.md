@@ -5,6 +5,13 @@ layout: default
 
 # Release Notes
 
+
+## v0.2.1 (01-Jan-2014)
+
+Found lingering reference to improperly named "Comm**o**ntator" instead of the
+correct "Comm**e**ntator", sadly in the Help.About string!  Fixed and re-published.
+
+
 ## v0.2.0 (01-Jan-2014)
 
 First public release.
