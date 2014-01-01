@@ -5,14 +5,14 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Spudnoggin.Commontator
+namespace Spudnoggin.Commentator
 {
-    [Guid(GuidList.CommontatorServiceString)]
-    internal class CommontatorService
+    [Guid(GuidList.CommentatorServiceString)]
+    internal class CommentatorService
     {
-        private CommontatorPackage package;
+        private CommentatorPackage package;
 
-        public CommontatorService(CommontatorPackage package)
+        public CommentatorService(CommentatorPackage package)
         {
             this.package = package;
         }

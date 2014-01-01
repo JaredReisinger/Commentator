@@ -3,12 +3,12 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
 VisualStudioVersion = 12.0.21005.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Commontator", "Commontator\Commontator.csproj", "{D0777B17-E20B-4AC2-A7CC-4D7A33FB0780}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Commentator", "Commentator\Commentator.csproj", "{D0777B17-E20B-4AC2-A7CC-4D7A33FB0780}"
 	ProjectSection(ProjectDependencies) = postProject
 		{CCEEBF46-FDAE-4BF5-9C12-6800F7B2BA2B} = {CCEEBF46-FDAE-4BF5-9C12-6800F7B2BA2B}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Commontator_IntegrationTests", "Commontator\Commontator_IntegrationTests\Commontator_IntegrationTests.csproj", "{EACBC43E-DD0C-4285-AA1F-59224B640872}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Commentator_IntegrationTests", "Commentator\Commentator_IntegrationTests\Commentator_IntegrationTests.csproj", "{EACBC43E-DD0C-4285-AA1F-59224B640872}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{D08A0202-7CDC-4E20-9210-0D957C838CD1}"
 	ProjectSection(SolutionItems) = preProject
@@ -18,7 +18,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		UnitTests.testsettings = UnitTests.testsettings
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Commontator_UnitTests", "Commontator\Commontator_UnitTests\Commontator_UnitTests.csproj", "{AFB5BDD7-098A-4FE3-93C4-432EFF561651}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Commentator_UnitTests", "Commentator\Commentator_UnitTests\Commentator_UnitTests.csproj", "{AFB5BDD7-098A-4FE3-93C4-432EFF561651}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{56999CFE-50CA-4376-A0E2-C38A0817C3FE}"
 	ProjectSection(SolutionItems) = preProject

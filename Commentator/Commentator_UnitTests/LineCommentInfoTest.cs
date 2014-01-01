@@ -6,9 +6,9 @@ using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Text.Classification.Fakes;
 using Microsoft.VisualStudio.Text.Fakes;
-using Spudnoggin.Commontator.AutoWrap;
+using Spudnoggin.Commentator.AutoWrap;
 
-namespace Commontator_UnitTests
+namespace Commentator_UnitTests
 {
     [TestClass]
     public class LineCommentInfoTest

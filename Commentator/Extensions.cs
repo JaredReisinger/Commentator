@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.Text;
 
-namespace Spudnoggin.Commontator
+namespace Spudnoggin.Commentator
 {
     public static class Extensions
     {

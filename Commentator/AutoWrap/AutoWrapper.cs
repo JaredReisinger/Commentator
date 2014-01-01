@@ -10,7 +10,7 @@ using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Utilities;
 
-namespace Spudnoggin.Commontator.AutoWrap
+namespace Spudnoggin.Commentator.AutoWrap
 {
     internal class AutoWrapper
     {
@@ -21,7 +21,7 @@ namespace Spudnoggin.Commontator.AutoWrap
 
         public AutoWrapper(SVsServiceProvider serviceProvider, IClassifierAggregatorService aggregatorService, IWpfTextView textView)
         {
-            var service = serviceProvider.GetService<CommontatorService>();
+            var service = serviceProvider.GetService<CommentatorService>();
             this.options = service.GetOptions();
 
             this.view = textView;

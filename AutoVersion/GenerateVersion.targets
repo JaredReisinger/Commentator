@@ -47,7 +47,7 @@
             AssemblyDescription="Advanced comment behavior for Visual Studio"
             AssemblyConfiguration="$(Configuration)"
             AssemblyCompany="Jared Reisinger"
-            AssemblyProduct="Commontator"
+            AssemblyProduct="Commentator"
             AssemblyCopyright="Copyright (c) $(Year) Jared Reisinger"
             AssemblyTrademark=""
             ComVisible="false"

@@ -9,16 +9,16 @@ using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.OLE.Interop;
 using Microsoft.VisualStudio.Shell;
 
-namespace Spudnoggin.Commontator
+namespace Spudnoggin.Commentator
 {
     [PackageRegistration(UseManagedResourcesOnly = true)]
     [InstalledProductRegistration("#110", "#112", AutoVersion.GeneratedConstants.InformationalVersion, IconResourceID = 400)]
     [ProvideOptionPage(typeof(GeneralOptions), AutoVersion.GeneratedConstants.Name, "General", 200, 201, false, 202)]
-    [ProvideService(typeof(CommontatorService))]
-    [Guid(GuidList.guidCommontatorPkgString)]
-    public sealed class CommontatorPackage : Package
+    [ProvideService(typeof(CommentatorService))]
+    [Guid(GuidList.guidCommentatorPkgString)]
+    public sealed class CommentatorPackage : Package
     {
-        public CommontatorPackage()
+        public CommentatorPackage()
         {
             ////Debug.WriteLine(string.Format(CultureInfo.CurrentCulture, "Entering constructor for: {0}", this.ToString()));
         }
@@ -29,7 +29,7 @@ namespace Spudnoggin.Commontator
             base.Initialize();
 
             var container = (IServiceContainer)this;
-            container.AddService(typeof(CommontatorService), this.CreateService, true);
+            container.AddService(typeof(CommentatorService), this.CreateService, true);
         }
 
         internal T GetDialogPage<T>()
@@ -40,9 +40,9 @@ namespace Spudnoggin.Commontator
 
         private object CreateService(IServiceContainer container, Type service)
         {
-            if (typeof(CommontatorService) == service)
+            if (typeof(CommentatorService) == service)
             {
-                return new CommontatorService(this);
+                return new CommentatorService(this);
             }
 
             return null;

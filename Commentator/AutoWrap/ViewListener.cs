@@ -10,7 +10,7 @@ using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Utilities;
 
-namespace Spudnoggin.Commontator.AutoWrap
+namespace Spudnoggin.Commentator.AutoWrap
 {
     [Export(typeof(IWpfTextViewCreationListener))]
     [ContentType("CSharp"), ContentType("C/C++"), ContentType("Basic")]

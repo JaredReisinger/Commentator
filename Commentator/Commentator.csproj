@@ -16,8 +16,8 @@
     <ProjectTypeGuids>{82b43b9b-a64c-4715-b499-d71e9ca2bd60};{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Spudnoggin.Commontator</RootNamespace>
-    <AssemblyName>Commontator</AssemblyName>
+    <RootNamespace>Spudnoggin.Commentator</RootNamespace>
+    <AssemblyName>Commentator</AssemblyName>
     <SignAssembly>True</SignAssembly>
     <AssemblyOriginatorKeyFile>Key.snk</AssemblyOriginatorKeyFile>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
@@ -137,7 +137,7 @@
     <Compile Include="..\AutoVersion\GeneratedConstants.cs">
       <Link>GeneratedConstants.cs</Link>
     </Compile>
-    <Compile Include="CommontatorService.cs" />
+    <Compile Include="CommentatorService.cs" />
     <Compile Include="GeneralOptions.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -152,7 +152,7 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="GlobalSuppressions.cs" />
-    <Compile Include="CommontatorPackage.cs" />
+    <Compile Include="CommentatorPackage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

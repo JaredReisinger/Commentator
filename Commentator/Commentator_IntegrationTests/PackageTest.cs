@@ -8,7 +8,7 @@ using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.Shell;
 using EnvDTE;
 
-namespace Commontator_IntegrationTests
+namespace Commentator_IntegrationTests
 {
     /// <summary>
     /// Integration test for package validation
@@ -49,7 +49,7 @@ namespace Commontator_IntegrationTests
 
                 //Validate package load
                 IVsPackage package;
-                Guid packageGuid = new Guid(Spudnoggin.Commontator.GuidList.guidCommontatorPkgString);
+                Guid packageGuid = new Guid(Spudnoggin.Commentator.GuidList.guidCommentatorPkgString);
                 Assert.IsTrue(0 == shellService.LoadPackage(ref packageGuid, out package));
                 Assert.IsNotNull(package, "Package failed to load");
 

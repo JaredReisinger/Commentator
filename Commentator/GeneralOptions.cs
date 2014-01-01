@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 
-namespace Spudnoggin.Commontator
+namespace Spudnoggin.Commentator
 {
     class GeneralOptions : DialogPage
     {

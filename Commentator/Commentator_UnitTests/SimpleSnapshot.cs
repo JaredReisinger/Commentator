@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.Text;
 
-namespace Commontator_UnitTests
+namespace Commentator_UnitTests
 {
     public class SimpleSnapshot : ITextSnapshot
     {

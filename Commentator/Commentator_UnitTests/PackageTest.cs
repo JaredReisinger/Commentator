@@ -16,9 +16,9 @@ using System.Reflection;
 using Microsoft.VsSDK.UnitTestLibrary;
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Spudnoggin.Commontator;
+using Spudnoggin.Commentator;
 
-namespace Commontator_UnitTests
+namespace Commentator_UnitTests
 {
     [TestClass()]
     public class PackageTest
@@ -26,13 +26,13 @@ namespace Commontator_UnitTests
         [TestMethod()]
         public void CreateInstance()
         {
-            CommontatorPackage package = new CommontatorPackage();
+            CommentatorPackage package = new CommentatorPackage();
         }
 
         [TestMethod()]
         public void IsIVsPackage()
         {
-            CommontatorPackage package = new CommontatorPackage();
+            CommentatorPackage package = new CommentatorPackage();
             Assert.IsNotNull(package as IVsPackage, "The object does not implement IVsPackage");
         }
 
@@ -40,7 +40,7 @@ namespace Commontator_UnitTests
         public void SetSite()
         {
             // Create the package
-            IVsPackage package = new CommontatorPackage() as IVsPackage;
+            IVsPackage package = new CommentatorPackage() as IVsPackage;
             Assert.IsNotNull(package, "The object does not implement IVsPackage");
 
             // Create a basic service provider
