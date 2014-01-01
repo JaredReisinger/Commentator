@@ -15,17 +15,27 @@
   <body>
     <div class="wrapper">
       <header>
+
         <h1>Commentator</h1>
+
         <p>Bringing a first-class comment experience to Visual Studio</p>
 
-        <p class="view"><a href="https://github.com/JaredReisinger/Commentator">View the Project on GitHub <small>JaredReisinger/Commentator</small></a></p>
-
+        <p class="view">
+          <a href="https://github.com/JaredReisinger/Commentator">View the Project on GitHub <small>JaredReisinger/Commentator</small></a>
+        </p>
 
         <ul>
           <li><a href="https://github.com/JaredReisinger/Commentator/zipball/master">Download <strong>ZIP File</strong></a></li>
           <li><a href="https://github.com/JaredReisinger/Commentator/tarball/master">Download <strong>TAR Ball</strong></a></li>
           <li><a href="https://github.com/JaredReisinger/Commentator">View On <strong>GitHub</strong></a></li>
         </ul>
+
+        <ul>
+          {% for item in site.data.mainlinks %}
+          <li><a href="{{ item.link }}">{{ item.title }}</a></li>
+          {% endfor %}
+        </ul>
+
       </header>
       <section>
       {{ content }}
