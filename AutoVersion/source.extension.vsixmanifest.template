@@ -9,9 +9,9 @@
         <DisplayName>${Name}</DisplayName>
         <Description>${Description}</Description>
         <MoreInfo>http://JaredReisinger.github.io/Commentator</MoreInfo>
+        <License>LICENSE.txt</License>
         <GettingStartedGuide>http://JaredReisinger.github.io/Commentator/GettingStarted.html</GettingStartedGuide>
         <ReleaseNotes>http://JaredReisinger.github.io/Commentator/ReleaseNotes.html</ReleaseNotes>
-        <License>LICENSE.txt</License>
         <Icon>Resources\Icon.png</Icon>
         <PreviewImage>Resources\PreviewImage.png</PreviewImage>
         <Tags>comment; comments; wrap; wrapping; word-wrap; productivity; C#; CSharp</Tags>
