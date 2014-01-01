@@ -5,7 +5,7 @@ layout: default
 
 # Release Notes
 
-## v0.1.4 (01-Jan-2014)
+## v0.2.0 (01-Jan-2014)
 
 First public release.
 
