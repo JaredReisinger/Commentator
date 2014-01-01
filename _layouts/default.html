@@ -30,29 +30,16 @@
           <li><a href="https://github.com/JaredReisinger/Commentator">View On <strong>GitHub</strong></a></li>
         </ul>
 
-        <ul>
-          {% for item in site.data.mainlinks %}          
-          <li>
-            {% capture cleanedUrl %}{{ page.url | remove_first:'/' }}{% endcapture %}
-            {% if cleanedUrl == item.link %}
-              <b>{{ item.title }}</b>
-            {% else %}
-              <a href="{{ item.link }}">{{ item.title }}</a>
-            {% endif %}
-          </li>
-          {% endfor %}
-        </ul>
-
+        {% capture cleanedUrl %}{{ page.url | remove_first:'/' }}{% endcapture %}
+        {% for item in site.data.mainlinks %}          
         <p>
-          Variables:
+          {% if cleanedUrl == item.link %}
+            <b>{{ item.title }}</b>
+          {% else %}
+            <a href="{{ item.link }}">{{ item.title }}</a>
+          {% endif %}
         </p>
-
-        <ul>
-          <li>{{ page.title }}</li>
-          <li>{{ page.url }}</li>
-          <li>{{ page.date }}</li>
-          <li>{{ page.id }}</li>
-        </ul>
+        {% endfor %}
 
       </header>
       <section>
