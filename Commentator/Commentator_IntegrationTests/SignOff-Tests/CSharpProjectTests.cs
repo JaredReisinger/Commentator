@@ -5,7 +5,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.VsSDK.IntegrationTestLibrary;
 using Microsoft.VSSDK.Tools.VsIdeTesting;
 
-namespace Commontator_IntegrationTests.IntegrationTests
+namespace Commentator_IntegrationTests.IntegrationTests
 {
     [TestClass]
     public class CSharpProjectTests

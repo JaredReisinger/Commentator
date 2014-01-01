@@ -7,7 +7,7 @@ using Microsoft.VSSDK.Tools.VsIdeTesting;
 using EnvDTE;
 using System.IO;
 
-namespace Commontator_IntegrationTests.IntegrationTests
+namespace Commentator_IntegrationTests.IntegrationTests
 {
     [TestClass]
     public class CPPProjectTests

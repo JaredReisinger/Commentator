@@ -118,13 +118,13 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="110" xml:space="preserve">
-    <value>Commontator</value>
+    <value>Commentator</value>
   </data>
   <data name="112" xml:space="preserve">
     <value>Advanced comment functionality for Visual Studio</value>
   </data>
   <data name="200" xml:space="preserve">
-    <value>Commontator</value>
+    <value>Commentator</value>
     <comment>options category</comment>
   </data>
   <data name="201" xml:space="preserve">
@@ -132,7 +132,7 @@
     <comment>options page</comment>
   </data>
   <data name="202" xml:space="preserve">
-    <value>commontator, auto-wrap, wrapping, comments, formatting</value>
+    <value>commentator, auto-wrap, wrapping, comments, formatting</value>
     <comment>options keywords</comment>
   </data>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />

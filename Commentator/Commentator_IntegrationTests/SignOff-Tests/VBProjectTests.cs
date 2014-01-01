@@ -6,7 +6,7 @@ using Microsoft.VsSDK.IntegrationTestLibrary;
 using Microsoft.VSSDK.Tools.VsIdeTesting;
 using EnvDTE;
 
-namespace Commontator_IntegrationTests.IntegrationTests
+namespace Commentator_IntegrationTests.IntegrationTests
 {
     [TestClass]
     public class VisualBasicProjectTests

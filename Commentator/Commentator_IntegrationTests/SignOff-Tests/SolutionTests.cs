@@ -9,7 +9,7 @@ using System.IO;
 using Microsoft.VsSDK.IntegrationTestLibrary;
 
 
-namespace Commontator_IntegrationTests.IntegrationTests
+namespace Commentator_IntegrationTests.IntegrationTests
 {
     [TestClass]
     public class SolutionTests
