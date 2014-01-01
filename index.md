@@ -26,3 +26,10 @@ you didn't have to pay any attention to which column you were in, because what
 you type automatically moves to the next line as needed?
 
 _Welcome to Commentator._
+
+## Demo
+
+<video width="640" height="480" controls="controls">
+  <source src="demo.wmv" type="video/wmv" />
+  <source src="demo.mp4" type="video/mp4" />
+</video>
