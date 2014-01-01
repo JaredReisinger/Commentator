@@ -22,12 +22,9 @@
 
         {% capture cleanedUrl %}{{ page.url | remove_first:'/' }}{% endcapture %}
 
-<p>page.url: {{ page.url }}
-<p>cleanedUrl: {{ cleanedUrl }}</p>
-
         {% for item in site.data.mainlinks %}          
           {% capture linkClass %}{% if cleanedUrl == item.link %}current{% endif %}{% endcapture %}
-        <p class="{{ linkClass }}"><a href="{{ item.link }}">{{ item.title }}</a></p>
+        <p><a href="{{ item.link }}" class="{{ linkClass }}">{{ item.title }}</a></p>
         {% endfor %}
 
         <hr />

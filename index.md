@@ -17,8 +17,8 @@ There are already several comment-formatting extensions for Visual Studio:
 and others, I'm sure.  Most of these provide some basic additional handling for
 comments by using a leading character to provide different formatting.
 
-**Commentator**, on the other hand, seeks to make writing and updating comments a
-much more natural and useful experience.  What if the process of writing or
+_**Commentator**_, on the other hand, seeks to make writing and updating comments
+a much more natural and useful experience.  What if the process of writing or
 editing comments felt more like using Word?  If adding a word or two in the
 middle of a comment didn't mean deciding between jaggedly uneven line lengths
 or manually reflowing to the next line (and the next, and the next).  What if
@@ -26,31 +26,3 @@ you didn't have to pay any attention to which column you were in, because what
 you type automatically moves to the next line as needed?
 
 _Welcome to Commentator._
-
-
-## Roadmap (roughly)
-
- * Auto-wrap comments as they are typed
-
-  * whitespace-separated words wrap on or before the line-length limit
-
-  * if the next line starts with a matching comment delimiter (same whitespace
-    before and after the "//") the word is injected into the beginning of the
-    line and that line is also wrapped
-
- * DocComment formatting
-
-  * more than just the DocComment tags, the entire comment block is formatted
-    to look like the MSDN-style documentation pages
-
-  * this _might_ include bringing in type/parameter/name information from the
-    related code
-
-  * support images in DocComments?  (and maybe elsewhere?)
-
- * also support prefix-based formatting (+, ++, !, ?, etc.?)
-
- * also support limited markdown formatting?
-
- * perhaps make multi-line ("//", "//" or "/*...*/") comments look like blocks
-   a la DocComments (above)?

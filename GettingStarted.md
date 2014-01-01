@@ -13,7 +13,7 @@ to turn Commentator off, you can do so via its Tools.Options setting.
 
 ## Demo
 
-<video width="640" height="480" controls>
-	<source src="demo.wmv" type="video/wmv" />
+<video width="640" height="480" controls="controls">
 	<source src="demo.mp4" type="video/mp4" />
+	<source src="demo.wmv" type="video/wmv" />
 </video>
