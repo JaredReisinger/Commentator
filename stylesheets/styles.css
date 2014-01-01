@@ -105,6 +105,10 @@ header h1 {
   font-weight: bold;
 }
 
+header .current {
+  font-weight: bold;
+}
+
 header ul.btn {
   list-style:none;
   height:40px;

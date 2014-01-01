@@ -20,6 +20,14 @@
 
         <p>Bringing a first-class comment experience to Visual Studio</p>
 
+        {% capture cleanedUrl %}{{ page.url | remove_first:'/' }}{% endcapture %}
+        {% capture linkClass %}{% if cleanedUrl == item.link %}current{% endif %}{% endcapture %}
+        {% for item in site.data.mainlinks %}          
+        <p class="{{ linkClass }}"><a href="{{ item.link }}">{{ item.title }}</a></p>
+        {% endfor %}
+
+        <hr />
+
         <p class="view">
           <a href="https://github.com/JaredReisinger/Commentator">View the Project on GitHub <small>JaredReisinger/Commentator</small></a>
         </p>
@@ -29,17 +37,6 @@
           <li><a href="https://github.com/JaredReisinger/Commentator/tarball/master">Download <strong>TAR Ball</strong></a></li>
           <li><a href="https://github.com/JaredReisinger/Commentator">View On <strong>GitHub</strong></a></li>
         </ul>
-
-        {% capture cleanedUrl %}{{ page.url | remove_first:'/' }}{% endcapture %}
-        {% for item in site.data.mainlinks %}          
-        <p>
-          {% if cleanedUrl == item.link %}
-            <b>{{ item.title }}</b>
-          {% else %}
-            <a href="{{ item.link }}">{{ item.title }}</a>
-          {% endif %}
-        </p>
-        {% endfor %}
 
       </header>
       <section>
