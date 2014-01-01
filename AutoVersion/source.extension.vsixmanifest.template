@@ -8,7 +8,9 @@
             Publisher="${Publisher}" />
         <DisplayName>${Name}</DisplayName>
         <Description>${Description}</Description>
-        <MoreInfo>https://github.com/JaredReisinger/Commentator</MoreInfo>
+        <MoreInfo>http://JaredReisinger.github.io/Commentator</MoreInfo>
+        <GettingStartedGuide>http://JaredReisinger.github.io/Commentator/GettingStarted.html</GettingStartedGuide>
+        <ReleaseNotes>http://JaredReisinger.github.io/Commentator/ReleaseNotes.html</ReleaseNotes>
         <License>LICENSE.txt</License>
         <ReleaseNotes></ReleaseNotes>
         <Icon>Resources\Icon.png</Icon>
