@@ -31,8 +31,12 @@
         </ul>
 
         <ul>
-          {% for item in site.data.mainlinks %}
-          <li><a href="{{ item.link }}">{{ item.title }}</a></li>
+          {% for item in site.data.mainlinks %}          
+          <li>
+            {% if page.url == item.link %}<b>{% endif %}
+            <a href="{{ item.link }}">{{ item.title }}</a>
+            {% if page.url == item.link %}</b>{% endif %}
+          </li>
           {% endfor %}
         </ul>
 

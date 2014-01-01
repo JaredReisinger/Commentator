@@ -3,7 +3,9 @@ title: Commentator
 layout: default
 ---
 
-# Why another comment extension?
+# Overview
+
+## Why another comment extension?
 
 There are already several comment-formatting extensions for Visual Studio:
 [CommentsPlus](http://visualstudiogallery.msdn.microsoft.com/f76e86e3-03ca-4ac8-ba88-58c8f8d818f4),
