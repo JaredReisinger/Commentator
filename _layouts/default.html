@@ -33,9 +33,12 @@
         <ul>
           {% for item in site.data.mainlinks %}          
           <li>
-            {% if page.url == item.link %}<b>{% endif %}
-            <a href="{{ item.link }}">{{ item.title }}</a>
-            {% if page.url == item.link %}</b>{% endif %}
+            {% capture cleanedUrl %}{{ page.url | remove_first:'/' }}{% endcapture %}
+            {% if cleanedUrl == item.link %}
+              <b>{{ item.title }}</b>
+            {% else %}
+              <a href="{{ item.link }}">{{ item.title }}</a>
+            {% endif %}
           </li>
           {% endfor %}
         </ul>
