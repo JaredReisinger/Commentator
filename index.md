@@ -17,7 +17,7 @@ There are already several comment-formatting extensions for Visual Studio:
 and others, I'm sure.  Most of these provide some basic additional handling for
 comments by using a leading character to provide different formatting.
 
-Commontator, on the other hand, seeks to make writing and updating comments a
+**Commentator**, on the other hand, seeks to make writing and updating comments a
 much more natural and useful experience.  What if the process of writing or
 editing comments felt more like using Word?  If adding a word or two in the
 middle of a comment didn't mean deciding between jaggedly uneven line lengths
@@ -25,7 +25,8 @@ or manually reflowing to the next line (and the next, and the next).  What if
 you didn't have to pay any attention to which column you were in, because what
 you type automatically moves to the next line as needed?
 
-Welcome to Commentator.
+_Welcome to Commentator._
+
 
 ## Roadmap (roughly)
 
