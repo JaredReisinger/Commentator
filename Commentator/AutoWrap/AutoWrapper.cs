@@ -93,10 +93,10 @@ namespace Spudnoggin.Commentator.AutoWrap
                 return;
             }
 
-            // If we just typed whitespace at the *end* of the line, don't do any
-            // wrapping yet.  (It will cause us to trim the trailing space, which
-            // would makeeverythingruntogetherlikethis!  It also makes newline
-            // handling weird.)
+            // If we just typed whitespace at the *end* of the line, don't do
+            // any wrapping yet.  (It will cause us to trim the trailing space,
+            // which would makeeverythingruntogetherlikethis!  It also makes
+            // newline handling weird.)
             if ((change.Delta > 0) &&
                 ((change.NewSpan.End >= line.End) && (change.NewSpan.End <= line.EndIncludingLineBreak)) &&
                 change.NewText.All(c => Whitespace.Contains(c)))
@@ -104,9 +104,10 @@ namespace Spudnoggin.Commentator.AutoWrap
                 return;
             }
 
-            var commentWrapLength = this.options.AutoWrapColumn - (info.ContentSpan.Start - info.Line.Start);
+            var commentWrapLength = this.options.AutoWrapColumn - info.ContentColumnStart;
 
-            // There's some minimum length after which wrapping becomes pointless...
+            // There's some minimum length after which wrapping becomes
+            // pointless...
             if (commentWrapLength < this.options.MinimumWrapWidth)
             {
                 return;
@@ -116,7 +117,51 @@ namespace Spudnoggin.Commentator.AutoWrap
 
             if (info.MarkerSpan.Start > info.Line.Start)
             {
-                leadingWhitespace = new string(' ', info.MarkerSpan.Start - info.Line.Start);
+                // Figure out the leading whitespace.  If there's no code on the
+                // line (it's comment-only), we can just take the span from the
+                // line start to the marker start.  Otherwise, we try to create
+                // the proper combination of tabs and spaces based on the editor
+                // settings.
+                if (info.CommentOnly)
+                {
+                    leadingWhitespace = new SnapshotSpan(info.Line.Start, info.MarkerSpan.Start).GetText();
+                }
+                else
+                {
+                    bool convertTabs;
+                    var convertTabsOption = new ConvertTabsToSpaces();
+                    // REVIEW: Is this the correct place to look for the option?
+                    if (!buffer.Properties.TryGetProperty(convertTabsOption.Key, out convertTabs))
+                    {
+                        convertTabs = convertTabsOption.Default;
+                    }
+
+                    if (convertTabs)
+                    {
+                        leadingWhitespace = new string(' ', info.MarkerColumnStart);
+                    }
+                    else
+                    {
+                        int tabSize;
+                        var tabSizeOption = new TabSize();
+                        // REVIEW: Is this the correct place to look for the option?
+                        if (!buffer.Properties.TryGetProperty(tabSizeOption.Key, out tabSize))
+                        {
+                            tabSize = tabSizeOption.Default;
+                        }
+
+                        leadingWhitespace = new string('\t', info.MarkerColumnStart / tabSize);
+
+                        // Add spaces if the marker-start isn't a multiple of
+                        // the tab size.
+                        if (info.MarkerColumnStart % tabSize != 0)
+                        {
+                            leadingWhitespace = string.Concat(
+                                leadingWhitespace,
+                                new string(' ', info.MarkerColumnStart % tabSize));
+                        }
+                    }
+                }
             }
 
             var marker = info.MarkerSpan.GetText();

@@ -12,10 +12,17 @@ namespace Commentator_UnitTests
         const string LineEnd = "\r\n";
         private List<SimpleLine> lines = new List<SimpleLine>();
         private string text;
+        private SimpleBuffer buffer;
 
         public SimpleSnapshot(params string[] lines)
+            : this(true, 4, lines)
+        {
+        }
+
+        public SimpleSnapshot(bool convertTabsToSpaces, int tabSize, params string[] lines)
         {
             this.text = string.Join(LineEnd, lines);
+            this.buffer = new SimpleBuffer(this, convertTabsToSpaces, tabSize);
 
             var lineNumber = 0;
             var offset = 0;
@@ -133,7 +140,7 @@ namespace Commentator_UnitTests
 
         public ITextBuffer TextBuffer
         {
-            get { throw new NotImplementedException(); }
+            get { return this.buffer; }
         }
 
         public char[] ToCharArray(int startIndex, int length)

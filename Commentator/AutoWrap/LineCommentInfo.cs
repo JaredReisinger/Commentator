@@ -109,7 +109,49 @@ namespace Spudnoggin.Commentator.AutoWrap
             var space = text.Skip(this.MarkerSpan.Length).TakeWhile(c => Whitespace.Contains(c)).Count();
             this.ContentSpan = new SnapshotSpan(commentStart + this.MarkerSpan.Length + space, this.CommentSpan.End);
 
-            ////var commentStartColumn = this.CommentSpan.CommentSpan.Start - line.Start;
+            // Determine the effective column of the comment, taking into
+            // account that tabs may be more than one space.  Sadly, there
+            // doesn't seem to be a way to handle this other than counting every
+            // character in the line!
+            var lineText = this.Line.Extent.GetText();
+            var currentColumn = 0;
+            var currentPos = this.Line.Start.Position;
+            this.ContentColumnStart = this.ContentSpan.Start.Position - currentPos;
+
+            int tabSize;
+            var tabSizeOption = new TabSize();
+            // REVIEW: Is this the correct place to look for the option?
+            if (!this.Line.Snapshot.TextBuffer.Properties.TryGetProperty(tabSizeOption.Key, out tabSize))
+            {
+                tabSize = tabSizeOption.Default;
+            }
+
+            foreach (var c in lineText)
+            {
+                if (currentPos == this.MarkerSpan.Start.Position)
+                {
+                    this.MarkerColumnStart = currentColumn;
+                }
+
+                if (currentPos == this.ContentSpan.Start.Position)
+                {
+                    this.ContentColumnStart = currentColumn;
+                    break;
+                }
+
+                // TODO: track effective comment start/end/length?
+                if (c == '\t')
+                {
+                    // round up to the next multiple of the tab-stop size!
+                    currentColumn += tabSize - (currentColumn % tabSize);
+                }
+                else
+                {
+                    currentColumn++;
+                }
+
+                currentPos++;
+            }
         }
 
         public static LineCommentInfo FromLine(ITextSnapshotLine line, IClassifier classifier)
@@ -142,7 +184,11 @@ namespace Spudnoggin.Commentator.AutoWrap
             if ((other != null) &&
                 (this.Style == other.Style) &&
                 (this.MarkerSpan.Length == other.MarkerSpan.Length) &&
-                (this.MarkerSpan.Start - this.Line.Start == other.MarkerSpan.Start - other.Line.Start) &&
+                // we *only* care about the start columns, not the position
+                // delta, because there may be mixed tabs and spaces.
+                ////(this.MarkerSpan.Start - this.Line.Start == other.MarkerSpan.Start - other.Line.Start) &&
+                (this.MarkerColumnStart == other.MarkerColumnStart) &&
+                (this.ContentColumnStart == other.ContentColumnStart) &&
                 string.Equals(this.MarkerSpan.GetText(), other.MarkerSpan.GetText()))
             {
                 // The leading info appears to match.  If there's content in
@@ -167,6 +213,8 @@ namespace Spudnoggin.Commentator.AutoWrap
         public CommentStyle Style { get; private set; }
         public SnapshotSpan MarkerSpan { get; private set; }
         public SnapshotSpan ContentSpan { get; private set; }
+        public int MarkerColumnStart { get; private set; }
+        public int ContentColumnStart { get; private set; }
         public bool CommentOnly { get; private set; }
     }
 }
