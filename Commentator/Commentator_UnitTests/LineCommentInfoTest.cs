@@ -15,6 +15,7 @@ namespace Commentator_UnitTests
     {
         StubIClassificationType commentClass;
         StubIClassifier wholeLineCommentClassifier;
+        SimpleEditorOptions defaultOptions;
 
         public LineCommentInfoTest()
         {
@@ -37,6 +38,10 @@ namespace Commentator_UnitTests
                 list.Add(span);
                 return list;
             };
+
+            this.defaultOptions = new SimpleEditorOptions();
+            this.defaultOptions.SetOptionValue("Tabs/ConvertTabsToSpaces", true);
+            this.defaultOptions.SetOptionValue("Tabs/TabSize", 4);
         }
 
         [TestMethod]
@@ -44,7 +49,7 @@ namespace Commentator_UnitTests
         {
             var line = new StubITextSnapshotLine();
             var classifier = new StubIClassifier();
-            var info = LineCommentInfo.FromLine(line, classifier);
+            var info = LineCommentInfo.FromLine(line, this.defaultOptions, classifier);
             Assert.IsNull(info);
         }
 
@@ -54,7 +59,11 @@ namespace Commentator_UnitTests
             var snapshot = new SimpleSnapshot(
                 "// this is a comment");
 
-            var info = LineCommentInfo.FromLine(snapshot.GetLineFromLineNumber(0), this.wholeLineCommentClassifier);
+            var info = LineCommentInfo.FromLine(
+                snapshot.GetLineFromLineNumber(0),
+                this.defaultOptions,
+                this.wholeLineCommentClassifier);
+
             Assert.IsNotNull(info);
             Assert.IsTrue(info.CommentOnly);
             Assert.AreEqual(info.Line.Extent, info.CommentSpan);
@@ -74,7 +83,11 @@ namespace Commentator_UnitTests
             var snapshot = new SimpleSnapshot(
                 "\t// this is a comment");
 
-            var info = LineCommentInfo.FromLine(snapshot.GetLineFromLineNumber(0), this.wholeLineCommentClassifier);
+            var info = LineCommentInfo.FromLine(
+                snapshot.GetLineFromLineNumber(0),
+                this.defaultOptions,
+                this.wholeLineCommentClassifier);
+
             Assert.IsNotNull(info);
             Assert.IsTrue(info.CommentOnly);
             Assert.AreEqual(1, info.CommentSpan.Start.Position);
@@ -88,11 +101,17 @@ namespace Commentator_UnitTests
         public void LeadingEightSpaceTabIsEightSpaces()
         {
             var snapshot = new SimpleSnapshot(
-                true,
-                8,
                 "\t// this is a comment");
 
-            var info = LineCommentInfo.FromLine(snapshot.GetLineFromLineNumber(0), this.wholeLineCommentClassifier);
+            var eightSpaceTab = new SimpleEditorOptions();
+            eightSpaceTab.Parent = this.defaultOptions;
+            eightSpaceTab.SetOptionValue("Tabs/TabSize", 8);
+
+            var info = LineCommentInfo.FromLine(
+                snapshot.GetLineFromLineNumber(0),
+                eightSpaceTab,
+                this.wholeLineCommentClassifier);
+
             Assert.IsNotNull(info);
             Assert.IsTrue(info.CommentOnly);
             Assert.AreEqual(1, info.CommentSpan.Start.Position);
@@ -109,8 +128,16 @@ namespace Commentator_UnitTests
                 "// this is a comment",
                 "// that continues to a second line");
 
-            var info0 = LineCommentInfo.FromLine(snapshot.GetLineFromLineNumber(0), this.wholeLineCommentClassifier);
-            var info1 = LineCommentInfo.FromLine(snapshot.GetLineFromLineNumber(1), this.wholeLineCommentClassifier);
+            var info0 = LineCommentInfo.FromLine(
+                snapshot.GetLineFromLineNumber(0),
+                this.defaultOptions,
+                this.wholeLineCommentClassifier);
+            
+            var info1 = LineCommentInfo.FromLine(
+                snapshot.GetLineFromLineNumber(1),
+                this.defaultOptions,
+                this.wholeLineCommentClassifier);
+
             Assert.IsNotNull(info0);
             Assert.IsNotNull(info1);
             Assert.IsTrue(info0.Matches(info1));
@@ -120,13 +147,19 @@ namespace Commentator_UnitTests
         public void MixedWhitespaceSingleLineCommentsMatch()
         {
             var snapshot = new SimpleSnapshot(
-                true,
-                4,
                 "    // this is a comment",
                 "\t// that continues to a second line");
 
-            var info0 = LineCommentInfo.FromLine(snapshot.GetLineFromLineNumber(0), this.wholeLineCommentClassifier);
-            var info1 = LineCommentInfo.FromLine(snapshot.GetLineFromLineNumber(1), this.wholeLineCommentClassifier);
+            var info0 = LineCommentInfo.FromLine(
+                snapshot.GetLineFromLineNumber(0),
+                this.defaultOptions,
+                this.wholeLineCommentClassifier);
+
+            var info1 = LineCommentInfo.FromLine(
+                snapshot.GetLineFromLineNumber(1),
+                this.defaultOptions,
+                this.wholeLineCommentClassifier);
+
             Assert.IsNotNull(info0);
             Assert.IsNotNull(info1);
             Assert.IsTrue(info0.Matches(info1));

@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Text.Editor;
+using Microsoft.VisualStudio.Text.Editor.OptionsExtensionMethods;
 using Microsoft.VisualStudio.Utilities;
 
 namespace Spudnoggin.Commentator.AutoWrap
@@ -30,7 +31,7 @@ namespace Spudnoggin.Commentator.AutoWrap
         readonly char[] Whitespace = new char[] { ' ', '\t' };
         readonly char[] FormatMarkers = new char[] { '+', '-', '!', '?' };
 
-        private LineCommentInfo(ITextSnapshotLine line, IList<ClassificationSpan> spans, SnapshotSpan commentSpan)
+        private LineCommentInfo(ITextSnapshotLine line, IList<ClassificationSpan> spans, SnapshotSpan commentSpan, IEditorOptions options)
         {
             this.Line = line;
             this.CommentSpan = commentSpan;
@@ -118,13 +119,7 @@ namespace Spudnoggin.Commentator.AutoWrap
             var currentPos = this.Line.Start.Position;
             this.ContentColumnStart = this.ContentSpan.Start.Position - currentPos;
 
-            int tabSize;
-            var tabSizeOption = new TabSize();
-            // REVIEW: Is this the correct place to look for the option?
-            if (!this.Line.Snapshot.TextBuffer.Properties.TryGetProperty(tabSizeOption.Key, out tabSize))
-            {
-                tabSize = tabSizeOption.Default;
-            }
+            int tabSize = options.GetTabSize();
 
             foreach (var c in lineText)
             {
@@ -154,7 +149,7 @@ namespace Spudnoggin.Commentator.AutoWrap
             }
         }
 
-        public static LineCommentInfo FromLine(ITextSnapshotLine line, IClassifier classifier)
+        public static LineCommentInfo FromLine(ITextSnapshotLine line, IEditorOptions options, IClassifier classifier)
         {
             // Check if the line ends with a comment...
             var spans = classifier.GetClassificationSpans(line.Extent);
@@ -169,7 +164,7 @@ namespace Spudnoggin.Commentator.AutoWrap
                 return null;
             }
 
-            var info = new LineCommentInfo(line, spans, span.Span);
+            var info = new LineCommentInfo(line, spans, span.Span, options);
             return info;
         }
 

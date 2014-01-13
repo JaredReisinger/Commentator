@@ -8,6 +8,7 @@ using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Text.Editor;
+using Microsoft.VisualStudio.Text.Editor.OptionsExtensionMethods;
 using Microsoft.VisualStudio.Utilities;
 
 namespace Spudnoggin.Commentator.AutoWrap
@@ -80,7 +81,7 @@ namespace Spudnoggin.Commentator.AutoWrap
             // Do some quick checks so we can fast-bail if this doesn't appear to
             // be a comment-line edit...
             var line = snapshot.GetLineFromLineNumber(firstLine);
-            var info = LineCommentInfo.FromLine(line, this.classifier);
+            var info = LineCommentInfo.FromLine(line, this.view.Options, this.classifier);
 
             if (info == null || (!info.CommentOnly && !this.options.CodeWrapEnabled))
             {
@@ -117,65 +118,60 @@ namespace Spudnoggin.Commentator.AutoWrap
 
             if (info.MarkerSpan.Start > info.Line.Start)
             {
+                // We no longer use the existing line as a template, because we
+                // should really be respecting the "add tabs as spaces" setting
+                // regardless of what the current line has.  (Or, should that be
+                // an option the user can set?)
+
                 // Figure out the leading whitespace.  If there's no code on the
                 // line (it's comment-only), we can just take the span from the
                 // line start to the marker start.  Otherwise, we try to create
                 // the proper combination of tabs and spaces based on the editor
                 // settings.
-                if (info.CommentOnly)
+                ////if (info.CommentOnly)
+                ////{
+                ////    leadingWhitespace = new SnapshotSpan(info.Line.Start, info.MarkerSpan.Start).GetText();
+                ////}
+                ////else
+                ////{
+                var convertTabs = this.view.Options.IsConvertTabsToSpacesEnabled();
+
+                if (convertTabs)
                 {
-                    leadingWhitespace = new SnapshotSpan(info.Line.Start, info.MarkerSpan.Start).GetText();
+                    leadingWhitespace = new string(' ', info.MarkerColumnStart);
                 }
                 else
                 {
-                    bool convertTabs;
-                    var convertTabsOption = new ConvertTabsToSpaces();
-                    // REVIEW: Is this the correct place to look for the option?
-                    if (!buffer.Properties.TryGetProperty(convertTabsOption.Key, out convertTabs))
-                    {
-                        convertTabs = convertTabsOption.Default;
-                    }
+                    var tabSize = this.view.Options.GetTabSize();
 
-                    if (convertTabs)
-                    {
-                        leadingWhitespace = new string(' ', info.MarkerColumnStart);
-                    }
-                    else
-                    {
-                        int tabSize;
-                        var tabSizeOption = new TabSize();
-                        // REVIEW: Is this the correct place to look for the option?
-                        if (!buffer.Properties.TryGetProperty(tabSizeOption.Key, out tabSize))
-                        {
-                            tabSize = tabSizeOption.Default;
-                        }
+                    leadingWhitespace = new string('\t', info.MarkerColumnStart / tabSize);
 
-                        leadingWhitespace = new string('\t', info.MarkerColumnStart / tabSize);
-
-                        // Add spaces if the marker-start isn't a multiple of
-                        // the tab size.
-                        if (info.MarkerColumnStart % tabSize != 0)
-                        {
-                            leadingWhitespace = string.Concat(
-                                leadingWhitespace,
-                                new string(' ', info.MarkerColumnStart % tabSize));
-                        }
+                    // Add spaces if the marker-start isn't a multiple of
+                    // the tab size.
+                    if (info.MarkerColumnStart % tabSize != 0)
+                    {
+                        leadingWhitespace = string.Concat(
+                            leadingWhitespace,
+                            new string(' ', info.MarkerColumnStart % tabSize));
                     }
                 }
+                ////}
             }
 
             var marker = info.MarkerSpan.GetText();
 
+            // TODO: Should the post-marker whitespace obey the same "tabs as
+            // spaces" settings as the leading whitespace does?
             var postMarkerWhitespace = new SnapshotSpan(info.MarkerSpan.End, info.ContentSpan.Start).GetText();
 
             // Do we need to check to see if the edit appeared to happen within
             // the comment span?
 
-            // Get all of the consecutive lines with matching comment info.  They
-            // all have the potential to be re-wrapped when edits happen. We
-            // could theoretically only grab the previous line--for back-wrapping--
-            // and subsequent lines only as needed.  But the odds are that folks
-            // aren't editing a several-thousand-line comment!
+            // Get all of the consecutive lines with matching comment info. 
+            // They all have the potential to be re-wrapped when edits happen. 
+            // We could theoretically only grab the previous line--for
+            // back-wrapping--and subsequent lines only as needed.  But the odds
+            // are that folks aren't editing a several-thousand-line comment!
             ////var lastLine = snapshot.GetLineNumberFromPosition(change.NewEnd);
             var comments = new List<LineCommentInfo>();
 
@@ -192,10 +188,10 @@ namespace Spudnoggin.Commentator.AutoWrap
             for (var lineNumber = firstLine + 1; lineNumber < snapshot.LineCount; lineNumber++)
             {
                 line = snapshot.GetLineFromLineNumber(lineNumber);
-                info = LineCommentInfo.FromLine(line, this.classifier);
+                info = LineCommentInfo.FromLine(line, this.view.Options, this.classifier);
 
-                // TODO: treat lines with code (non-comment) as non-matching
-                // so that behavior is better?
+                // TODO: treat lines with code (non-comment) as non-matching so
+                // that behavior is better?
                 if (!comments[0].Matches(info))
                 {
                     break;
@@ -209,7 +205,7 @@ namespace Spudnoggin.Commentator.AutoWrap
             for (var lineNumber = firstLine - 1; lineNumber >= 0; lineNumber--)
             {
                 line = snapshot.GetLineFromLineNumber(lineNumber);
-                info = LineCommentInfo.FromLine(line, this.classifier);
+                info = LineCommentInfo.FromLine(line, this.view.Options, this.classifier);
 
                 if (!comments[0].Matches(info))
                 {
@@ -430,7 +426,7 @@ namespace Spudnoggin.Commentator.AutoWrap
 
                     // Try to set the new caret position...
                     var newCaretLine = newSnapshot.GetLineFromLineNumber(firstLine + caretLineOffset);
-                    info = LineCommentInfo.FromLine(newCaretLine, this.classifier);
+                    info = LineCommentInfo.FromLine(newCaretLine, this.view.Options, this.classifier);
                     if (info != null)
                     {
                         this.newCaretPoint = info.ContentSpan.Start + caretPositionOffset;

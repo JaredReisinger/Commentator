@@ -15,14 +15,9 @@ namespace Commentator_UnitTests
         private SimpleBuffer buffer;
 
         public SimpleSnapshot(params string[] lines)
-            : this(true, 4, lines)
-        {
-        }
-
-        public SimpleSnapshot(bool convertTabsToSpaces, int tabSize, params string[] lines)
         {
             this.text = string.Join(LineEnd, lines);
-            this.buffer = new SimpleBuffer(this, convertTabsToSpaces, tabSize);
+            this.buffer = new SimpleBuffer(this);
 
             var lineNumber = 0;
             var offset = 0;

@@ -71,6 +71,7 @@
     <Compile Include="PackageTest.cs" />
     <Compile Include="LineCommentInfoTest.cs" />
     <Compile Include="SimpleBuffer.cs" />
+    <Compile Include="SimpleEditorOptions.cs" />
     <Compile Include="SimpleLine.cs" />
     <Compile Include="SimpleSnapshot.cs" />
     <!---->

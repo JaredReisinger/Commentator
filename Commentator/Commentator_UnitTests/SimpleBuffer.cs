@@ -14,15 +14,9 @@ namespace Commentator_UnitTests
         SimpleSnapshot snapshot;
         PropertyCollection properties = new PropertyCollection();
 
-        public SimpleBuffer(SimpleSnapshot snapshot, bool convertTabsToSpaces = true, int tabSize = 4)
+        public SimpleBuffer(SimpleSnapshot snapshot)
         {
             this.snapshot = snapshot;
-
-            var tabSizeOption = new TabSize();
-            this.properties.AddProperty(tabSizeOption.Key, tabSize);
-
-            var convertTabsOption = new ConvertTabsToSpaces();
-            this.properties.AddProperty(convertTabsOption.Key, convertTabsToSpaces);
         }
 
         public void ChangeContentType(Microsoft.VisualStudio.Utilities.IContentType newContentType, object editTag)
