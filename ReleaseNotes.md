@@ -5,6 +5,10 @@ layout: default
 
 # Release Notes
 
+## v0.2.3 (12-Jan-2014)
+
+Fixed issue where leading tabs were counted as _one_ character/column rather
+than using the current view's settings.
 
 ## v0.2.1 (01-Jan-2014)
 
