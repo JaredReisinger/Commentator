@@ -5,6 +5,11 @@ layout: default
 
 # Release Notes
 
+## v0.2.4 (17-Jan-2014)
+
+Added "**Avoid wrapping before line**" setting to avoid wrapping in file-header
+comments.
+
 ## v0.2.3 (12-Jan-2014)
 
 Fixed issue where leading tabs were counted as _one_ character/column rather
