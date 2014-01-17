@@ -76,10 +76,19 @@ namespace Spudnoggin.Commentator.AutoWrap
                 return;
             }
 
+            // The UI shows lines as 1-based, but the API is 0-based, so we need
+            // to subtract 1.
+            var avoidWrappingBeforeLine = Math.Max(0, this.options.AvoidWrappingBeforeLine - 1);
             var firstLine = snapshot.GetLineNumberFromPosition(change.NewPosition);
 
-            // Do some quick checks so we can fast-bail if this doesn't appear to
-            // be a comment-line edit...
+            // If we're in the "don't auto-wrap" leading lines, bail.
+            if (firstLine < avoidWrappingBeforeLine)
+            {
+                return;
+            }
+
+            // Do some quick checks so we can fast-bail if this doesn't appear
+            // to be a comment-line edit...
             var line = snapshot.GetLineFromLineNumber(firstLine);
             var info = LineCommentInfo.FromLine(line, this.view.Options, this.classifier);
 
@@ -122,18 +131,6 @@ namespace Spudnoggin.Commentator.AutoWrap
                 // should really be respecting the "add tabs as spaces" setting
                 // regardless of what the current line has.  (Or, should that be
                 // an option the user can set?)
-
-                // Figure out the leading whitespace.  If there's no code on the
-                // line (it's comment-only), we can just take the span from the
-                // line start to the marker start.  Otherwise, we try to create
-                // the proper combination of tabs and spaces based on the editor
-                // settings.
-                ////if (info.CommentOnly)
-                ////{
-                ////    leadingWhitespace = new SnapshotSpan(info.Line.Start, info.MarkerSpan.Start).GetText();
-                ////}
-                ////else
-                ////{
                 var convertTabs = this.view.Options.IsConvertTabsToSpacesEnabled();
 
                 if (convertTabs)
@@ -155,7 +152,6 @@ namespace Spudnoggin.Commentator.AutoWrap
                             new string(' ', info.MarkerColumnStart % tabSize));
                     }
                 }
-                ////}
             }
 
             var marker = info.MarkerSpan.GetText();
@@ -202,7 +198,7 @@ namespace Spudnoggin.Commentator.AutoWrap
 
             // Work backwards to find any previous comments that are a part of
             // the same block...
-            for (var lineNumber = firstLine - 1; lineNumber >= 0; lineNumber--)
+            for (var lineNumber = firstLine - 1; lineNumber >= avoidWrappingBeforeLine; lineNumber--)
             {
                 line = snapshot.GetLineFromLineNumber(lineNumber);
                 info = LineCommentInfo.FromLine(line, this.view.Options, this.classifier);

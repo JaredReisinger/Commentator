@@ -17,6 +17,7 @@ namespace Spudnoggin.Commentator
             this.AutoWrapColumn = 80;
             this.MinimumWrapWidth = 10;
             this.CodeWrapEnabled = false;
+            this.AvoidWrappingBeforeLine = 1;
         }
 
         [Category("Automatic Wrapping")]
@@ -44,6 +45,15 @@ namespace Spudnoggin.Commentator
             + " consecutive lines will be treated as a single, wrappable block.")]
         [DefaultValue(false)]
         public bool CodeWrapEnabled { get; set; }
+
+        [Category("Automatic Wrapping")]
+        [DisplayName("Avoid wrapping before line")]
+        [Description("Avoids wrapping comments at the beginning of the file.  If you"
+            + " use a file-header comment, you should set this to the first line number"
+            + " on which you want wrapping to occur.")]
+        [DefaultValue(1)]
+        public int AvoidWrappingBeforeLine { get; set; }
+
 
         ////#region ICustomTypeDescriptor Members
 
