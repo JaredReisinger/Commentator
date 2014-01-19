@@ -74,6 +74,7 @@
     <Compile Include="SimpleEditorOptions.cs" />
     <Compile Include="SimpleLine.cs" />
     <Compile Include="SimpleSnapshot.cs" />
+    <Compile Include="AutoWrapperTest.cs" />
     <!---->
     <!---->
     <!---->

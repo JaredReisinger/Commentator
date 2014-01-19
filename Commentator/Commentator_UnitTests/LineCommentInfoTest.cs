@@ -45,7 +45,7 @@ namespace Commentator_UnitTests
         }
 
         [TestMethod]
-        public void NoClassificationsMeansNullInfo()
+        public void LineCommentInfo_NoClassificationsMeansNullInfo()
         {
             var line = new StubITextSnapshotLine();
             var classifier = new StubIClassifier();
@@ -54,7 +54,7 @@ namespace Commentator_UnitTests
         }
 
         [TestMethod]
-        public void SimpleSingleLineComment()
+        public void LineCommentInfo_SimpleSingleLineComment()
         {
             var snapshot = new SimpleSnapshot(
                 "// this is a comment");
@@ -78,7 +78,7 @@ namespace Commentator_UnitTests
         }
 
         [TestMethod]
-        public void LeadingTabIsFourSpaces()
+        public void LineCommentInfo_LeadingTabIsFourSpaces()
         {
             var snapshot = new SimpleSnapshot(
                 "\t// this is a comment");
@@ -98,7 +98,7 @@ namespace Commentator_UnitTests
         }
 
         [TestMethod]
-        public void LeadingEightSpaceTabIsEightSpaces()
+        public void LineCommentInfo_LeadingEightSpaceTabIsEightSpaces()
         {
             var snapshot = new SimpleSnapshot(
                 "\t// this is a comment");
@@ -122,7 +122,7 @@ namespace Commentator_UnitTests
         }
 
         [TestMethod]
-        public void SimpleSingleLineCommentsMatch()
+        public void LineCommentInfo_SimpleSingleLineCommentsMatch()
         {
             var snapshot = new SimpleSnapshot(
                 "// this is a comment",
@@ -144,7 +144,7 @@ namespace Commentator_UnitTests
         }
 
         [TestMethod]
-        public void MixedWhitespaceSingleLineCommentsMatch()
+        public void LineCommentInfo_MixedWhitespaceSingleLineCommentsMatch()
         {
             var snapshot = new SimpleSnapshot(
                 "    // this is a comment",

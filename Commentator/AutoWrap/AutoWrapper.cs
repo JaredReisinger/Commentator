@@ -38,8 +38,8 @@ namespace Spudnoggin.Commentator.AutoWrap
             this.view.Closed -= this.View_Closed;
         }
 
-        readonly char[] Whitespace = new char[] { ' ', '\t', '\r', '\n' };
-        readonly char[] DoubleSpace = new char[] { '.', '?', '!' };
+        readonly static char[] Whitespace = new char[] { ' ', '\t', '\r', '\n' };
+        readonly static char[] DoubleSpace = new char[] { '.', '?', '!' };
 
         private void TextBuffer_Changed(object sender, TextContentChangedEventArgs e)
         {
@@ -123,36 +123,7 @@ namespace Spudnoggin.Commentator.AutoWrap
                 return;
             }
 
-            var leadingWhitespace = string.Empty;
-
-            if (info.MarkerSpan.Start > info.Line.Start)
-            {
-                // We no longer use the existing line as a template, because we
-                // should really be respecting the "add tabs as spaces" setting
-                // regardless of what the current line has.  (Or, should that be
-                // an option the user can set?)
-                var convertTabs = this.view.Options.IsConvertTabsToSpacesEnabled();
-
-                if (convertTabs)
-                {
-                    leadingWhitespace = new string(' ', info.MarkerColumnStart);
-                }
-                else
-                {
-                    var tabSize = this.view.Options.GetTabSize();
-
-                    leadingWhitespace = new string('\t', info.MarkerColumnStart / tabSize);
-
-                    // Add spaces if the marker-start isn't a multiple of
-                    // the tab size.
-                    if (info.MarkerColumnStart % tabSize != 0)
-                    {
-                        leadingWhitespace = string.Concat(
-                            leadingWhitespace,
-                            new string(' ', info.MarkerColumnStart % tabSize));
-                    }
-                }
-            }
+            var leadingWhitespace = this.LeadingWhitespaceFromInfo(info);
 
             var marker = info.MarkerSpan.GetText();
 
@@ -168,162 +139,93 @@ namespace Spudnoggin.Commentator.AutoWrap
             // We could theoretically only grab the previous line--for
             // back-wrapping--and subsequent lines only as needed.  But the odds
             // are that folks aren't editing a several-thousand-line comment!
-            ////var lastLine = snapshot.GetLineNumberFromPosition(change.NewEnd);
-            var comments = new List<LineCommentInfo>();
-
-            // Start by getting all of the matching lines that follow the beginning
-            // of the change...
-            comments.Add(info);
+            var followingInfos = this.GetMatchingComments(snapshot, info, firstLine + 1, snapshot.LineCount);
+            var precedingInfos = this.GetMatchingComments(snapshot, info, firstLine - 1, avoidWrappingBeforeLine);
 
             // Figure out the relative position of the caret within the comment
             // content.  We'll need this to dead-reckon the final location the
             // caret should have.
             var caretContentOffset = caretPosition - info.ContentSpan.Start;
-            var caretCommentIndex = 0;
+            var caretCommentIndex = precedingInfos.Count;
 
-            for (var lineNumber = firstLine + 1; lineNumber < snapshot.LineCount; lineNumber++)
-            {
-                line = snapshot.GetLineFromLineNumber(lineNumber);
-                info = LineCommentInfo.FromLine(line, this.view.Options, this.classifier);
+            firstLine -= precedingInfos.Count;
 
-                // TODO: treat lines with code (non-comment) as non-matching so
-                // that behavior is better?
-                if (!comments[0].Matches(info))
-                {
-                    break;
-                }
+            var comments = new List<LineCommentInfo>();
 
-                comments.Add(info);
-            }
+            comments.AddRange(precedingInfos);
+            comments.Add(info);
+            comments.AddRange(followingInfos);
 
-            // Work backwards to find any previous comments that are a part of
-            // the same block...
-            for (var lineNumber = firstLine - 1; lineNumber >= avoidWrappingBeforeLine; lineNumber--)
-            {
-                line = snapshot.GetLineFromLineNumber(lineNumber);
-                info = LineCommentInfo.FromLine(line, this.view.Options, this.classifier);
+            ////for (var lineNumber = firstLine + 1; lineNumber < snapshot.LineCount; lineNumber++)
+            ////{
+            ////    line = snapshot.GetLineFromLineNumber(lineNumber);
+            ////    info = LineCommentInfo.FromLine(line, this.view.Options, this.classifier);
 
-                if (!comments[0].Matches(info))
-                {
-                    break;
-                }
+            ////    // TODO: treat lines with code (non-comment) as non-matching so
+            ////    // that behavior is better?
+            ////    if (!comments[0].Matches(info))
+            ////    {
+            ////        break;
+            ////    }
 
-                firstLine = lineNumber;
-                comments.Insert(0, info);
-                caretCommentIndex++;
-            }
+            ////    comments.Add(info);
+            ////}
+
+            ////// Work backwards to find any previous comments that are a part of
+            ////// the same block...
+            ////for (var lineNumber = firstLine - 1; lineNumber >= avoidWrappingBeforeLine; lineNumber--)
+            ////{
+            ////    line = snapshot.GetLineFromLineNumber(lineNumber);
+            ////    info = LineCommentInfo.FromLine(line, this.view.Options, this.classifier);
+
+            ////    if (!comments[0].Matches(info))
+            ////    {
+            ////        break;
+            ////    }
+
+            ////    firstLine = lineNumber;
+            ////    comments.Insert(0, info);
+            ////    caretCommentIndex++;
+            ////}
 
             // Now build of a list of "properly wrapped" text for the entire
             // range of lines... Rather than taking each line piecemeal, we
             // concatenate all of the comments together, and wrap completely.
             // (We might end up removing/adding lines.)
-            var builder = new StringBuilder(commentWrapLength * comments.Count);
+            var builder = FlattenCommentParagraph(
+                comments,
+                commentWrapLength,
+                caretCommentIndex,
+                ref caretContentOffset);
 
-            foreach (var comment in comments)
-            {
-                // Add proper whitespace depending on the previous text...
-                if (builder.Length > 0)
-                {
-                    var wrappingWhitespace = " ";
+            int caretLineOffset;
+            int caretPositionOffset;
 
-                    if (DoubleSpace.Contains(builder[builder.Length - 1]))
-                    {
-                        wrappingWhitespace = "  ";
-                    }
-
-                    builder.Append(wrappingWhitespace);
-
-                    if (caretCommentIndex >= 0)
-                    {
-                        caretContentOffset += wrappingWhitespace.Length;
-                    }
-                }
-
-                var text = comment.ContentSpan.GetText().Trim();
-                builder.Append(text);
-
-                if (caretCommentIndex > 0)
-                {
-                    caretContentOffset += text.Length;
-                }
-
-                caretCommentIndex--;
-            }
+            var wrappedText = RewrapCommentParagraph(
+                builder,
+                commentWrapLength,
+                caretContentOffset,
+                out caretLineOffset,
+                out caretPositionOffset);
 
             // Now update all of the comment spans in the range...
             using (var edit = buffer.CreateEdit())
             {
-                var caretLineOffset = 0;
-                var caretPositionOffset = 0;
+                ////var caretLineOffset = 0;
+                ////var caretPositionOffset = 0;
 
                 foreach (var comment in comments)
                 {
-                    if (builder.Length > 0)
+                    if (wrappedText.Count > 0)
                     {
-                        string final;
-
-                        if (builder.Length > commentWrapLength)
+                        var text = wrappedText[0];
+                        if (text.Length != comment.ContentSpan.Length ||
+                            !string.Equals(text, comment.ContentSpan.GetText(), StringComparison.Ordinal))
                         {
-                            // Find the next line-break...
-                            var candidate = builder.ToString(0, commentWrapLength + 1);
-                            var end = candidate.LastIndexOfAny(Whitespace);
-
-                            // TODO: if there isn't a wrap-point, take the whole string
-                            // and look forward... we'll just have to live with a long
-                            // line.  For now, we force-wrap at limit.
-                            if (end < 0)
-                            {
-                                end = commentWrapLength;
-                            }
-
-                            // Only replace if we ended up with different text...
-                            final = candidate.Substring(0, end);
-
-                            while ((builder.Length > end) && Whitespace.Contains(builder[end]))
-                            {
-                                end++;
-                            }
-
-                            // Remove the line and any trailing whitespace
-                            builder.Remove(0, end);
-
-                            if (end < caretContentOffset)
-                            {
-                                caretContentOffset -= end;
-                                caretLineOffset++;
-                            }
-                            else if (final.Length < caretContentOffset)
-                            {
-                                // The caret was in the trailing whitespace...
-                                // should we advance to the next line, or
-                                // leave it at the end of the current line?
-                                caretPositionOffset = final.Length;
-                                caretContentOffset = -1;
-
-                            }
-                            else if (caretContentOffset > -1)
-                            {
-                                caretPositionOffset = caretContentOffset;
-                                caretContentOffset = -1;
-                            }
-                        }
-                        else
-                        {
-                            final = builder.ToString();
-                            builder.Clear();
-
-                            if (caretContentOffset > -1)
-                            {
-                                caretPositionOffset = caretContentOffset;
-                                caretContentOffset = -1;
-                            }
+                            edit.Replace(comment.ContentSpan.Span, text);
                         }
 
-                        if (final.Length != comment.ContentSpan.Length ||
-                            !string.Equals(final, comment.ContentSpan.GetText(), StringComparison.Ordinal))
-                        {
-                            edit.Replace(comment.ContentSpan.Span, final);
-                        }
+                        wrappedText.RemoveAt(0);
                     }
                     else
                     {
@@ -340,75 +242,22 @@ namespace Spudnoggin.Commentator.AutoWrap
                 }
 
                 // Add new lines as needed...
-                if (builder.Length > 0)
+                if (wrappedText.Count > 0)
                 {
                     var newLines = new StringBuilder();
 
-                    while (builder.Length > 0)
+                    while (wrappedText.Count > 0)
                     {
-                        string final;
-
-                        if (builder.Length > commentWrapLength)
-                        {
-                            // Find the next line-break...
-                            var candidate = builder.ToString(0, commentWrapLength + 1);
-                            var end = candidate.LastIndexOfAny(Whitespace);
-
-                            // TODO: if there isn't a wrap-point, take the whole string
-                            // and look forward... we'll just have to live with a long
-                            // line.  For now, we force-wrap at limit.
-                            if (end < 0)
-                            {
-                                end = commentWrapLength;
-                            }
-
-                            final = candidate.Substring(0, end);
-
-                            while ((builder.Length > end) && Whitespace.Contains(builder[end]))
-                            {
-                                end++;
-                            }
-
-                            builder.Remove(0, end);
-
-                            if (end < caretContentOffset)
-                            {
-                                caretContentOffset -= end;
-                                caretLineOffset++;
-                            }
-                            else if (final.Length < caretContentOffset)
-                            {
-                                // The caret was in the trailing whitespace...
-                                // should we advance to the next line, or
-                                // leave it at the end of the current line?
-                                caretPositionOffset = final.Length;
-                                caretContentOffset = -1;
-
-                            }
-                            else if (caretContentOffset > -1)
-                            {
-                                caretPositionOffset = caretContentOffset;
-                                caretContentOffset = -1;
-                            }
-                        }
-                        else
-                        {
-                            final = builder.ToString();
-                            builder.Clear();
-
-                            if (caretContentOffset > -1)
-                            {
-                                caretPositionOffset = caretContentOffset;
-                                caretContentOffset = -1;
-                            }
-                        }
+                        var text = wrappedText[0];
 
                         // Create a new line...
                         newLines.Append("\r\n");
                         newLines.Append(leadingWhitespace);
                         newLines.Append(marker);
                         newLines.Append(postMarkerWhitespace);
-                        newLines.Append(final);
+                        newLines.Append(text);
+
+                        wrappedText.RemoveAt(0);
                     }
 
                     edit.Insert(
@@ -443,6 +292,211 @@ namespace Spudnoggin.Commentator.AutoWrap
             // because we might have just moved the text behind it to the
             // next line... (no longer needed... this should trigger an
             // additional change...
+        }
+
+        private string LeadingWhitespaceFromInfo(LineCommentInfo info)
+        {
+            var leadingWhitespace = string.Empty;
+
+            if (info.MarkerSpan.Start > info.Line.Start)
+            {
+                // We no longer use the existing line as a template, because we
+                // should really be respecting the "add tabs as spaces" setting
+                // regardless of what the current line has.  (Or, should that be
+                // an option the user can set?)
+                var convertTabs = this.view.Options.IsConvertTabsToSpacesEnabled();
+
+                if (convertTabs)
+                {
+                    leadingWhitespace = new string(' ', info.MarkerColumnStart);
+                }
+                else
+                {
+                    var tabSize = this.view.Options.GetTabSize();
+
+                    leadingWhitespace = new string('\t', info.MarkerColumnStart / tabSize);
+
+                    // Add spaces if the marker-start isn't a multiple of
+                    // the tab size.
+                    if (info.MarkerColumnStart % tabSize != 0)
+                    {
+                        leadingWhitespace = string.Concat(
+                            leadingWhitespace,
+                            new string(' ', info.MarkerColumnStart % tabSize));
+                    }
+                }
+            }
+            return leadingWhitespace;
+        }
+
+        private IList<LineCommentInfo> GetMatchingComments(
+            ITextSnapshot snapshot,
+            LineCommentInfo toMatch,
+            int lineNumberStart,
+            int lineNumberLimit)
+        {
+            var list = new List<LineCommentInfo>();
+
+            var up = lineNumberLimit >= lineNumberStart;
+            var delta = up ? 1 : -1;
+
+            for (
+                var lineNumber = lineNumberStart;
+                up ? lineNumber < lineNumberLimit : lineNumber >= lineNumberLimit;
+                lineNumber += delta)
+            {
+                var line = snapshot.GetLineFromLineNumber(lineNumber);
+                var info = LineCommentInfo.FromLine(line, this.view.Options, this.classifier);
+
+                // TODO: treat lines with code (non-comment) as non-matching so
+                // that behavior is better?
+                if (!toMatch.Matches(info))
+                {
+                    break;
+                }
+
+                list.Add(info);
+            }
+
+            if (!up)
+            {
+                list.Reverse();
+            }
+
+            return list;
+        }
+
+        private static StringBuilder FlattenCommentParagraph(
+            List<LineCommentInfo> comments,
+            int commentWrapLength,
+            int caretCommentIndex,
+            ref int caretContentOffset)
+        {
+            var list = comments.Select(i => i.ContentSpan.GetText()).ToList();
+
+            return FlattenCommentParagraph(
+                list,
+                commentWrapLength,
+                caretCommentIndex,
+                ref caretContentOffset);
+        }
+
+        private static StringBuilder FlattenCommentParagraph(
+            List<string> comments,
+            int commentWrapLength,
+            int caretCommentIndex,
+            ref int caretContentOffset)
+        {
+            var builder = new StringBuilder(commentWrapLength * comments.Count);
+
+            foreach (var comment in comments)
+            {
+                // Add proper whitespace depending on the previous text...
+                if (builder.Length > 0)
+                {
+                    var wrappingWhitespace = " ";
+
+                    if (DoubleSpace.Contains(builder[builder.Length - 1]))
+                    {
+                        wrappingWhitespace = "  ";
+                    }
+
+                    builder.Append(wrappingWhitespace);
+
+                    if (caretCommentIndex >= 0)
+                    {
+                        caretContentOffset += wrappingWhitespace.Length;
+                    }
+                }
+
+                var text = comment.Trim();
+                builder.Append(text);
+
+                if (caretCommentIndex > 0)
+                {
+                    caretContentOffset += text.Length;
+                }
+
+                caretCommentIndex--;
+            }
+            return builder;
+        }
+
+        internal static List<string> RewrapCommentParagraph(
+            StringBuilder builder,
+            int commentWrapLength,
+            int caretContentOffset,
+            out int caretLineOffset,
+            out int caretPositionOffset)
+        {
+            caretLineOffset = 0;
+            caretPositionOffset = 0;
+            var list = new List<string>();
+
+            while (builder.Length > 0)
+            {
+                string final;
+
+                if (builder.Length > commentWrapLength)
+                {
+                    // Find the next line-break...
+                    var candidate = builder.ToString(0, commentWrapLength + 1);
+                    var end = candidate.LastIndexOfAny(Whitespace);
+
+                    // TODO: if there isn't a wrap-point, take the whole string
+                    // and look forward... we'll just have to live with a long
+                    // line.  For now, we force-wrap at limit.
+                    if (end < 0)
+                    {
+                        end = commentWrapLength;
+                    }
+
+                    // Only replace if we ended up with different text...
+                    final = candidate.Substring(0, end);
+
+                    while ((builder.Length > end) && Whitespace.Contains(builder[end]))
+                    {
+                        end++;
+                    }
+
+                    // Remove the line and any trailing whitespace
+                    builder.Remove(0, end);
+
+                    if (end < caretContentOffset)
+                    {
+                        caretContentOffset -= end;
+                        caretLineOffset++;
+                    }
+                    else if (final.Length < caretContentOffset)
+                    {
+                        // The caret was in the trailing whitespace...
+                        // should we advance to the next line, or
+                        // leave it at the end of the current line?
+                        caretPositionOffset = final.Length;
+                        caretContentOffset = -1;
+                    }
+                    else if (caretContentOffset > -1)
+                    {
+                        caretPositionOffset = caretContentOffset;
+                        caretContentOffset = -1;
+                    }
+                }
+                else
+                {
+                    final = builder.ToString();
+                    builder.Clear();
+
+                    if (caretContentOffset > -1)
+                    {
+                        caretPositionOffset = caretContentOffset;
+                        caretContentOffset = -1;
+                    }
+                }
+
+                list.Add(final);
+            }
+
+            return list;
         }
 
         private void UpdateCaretEventually(object sender, TextViewLayoutChangedEventArgs e)

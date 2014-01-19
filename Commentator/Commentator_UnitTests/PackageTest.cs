@@ -20,24 +20,24 @@ using Spudnoggin.Commentator;
 
 namespace Commentator_UnitTests
 {
-    [TestClass()]
+    [TestClass]
     public class PackageTest
     {
-        [TestMethod()]
-        public void CreateInstance()
+        [TestMethod]
+        public void Package_CreateInstance()
         {
             CommentatorPackage package = new CommentatorPackage();
         }
 
-        [TestMethod()]
-        public void IsIVsPackage()
+        [TestMethod]
+        public void Package_IsIVsPackage()
         {
             CommentatorPackage package = new CommentatorPackage();
             Assert.IsNotNull(package as IVsPackage, "The object does not implement IVsPackage");
         }
 
-        [TestMethod()]
-        public void SetSite()
+        [TestMethod]
+        public void Package_SetSite()
         {
             // Create the package
             IVsPackage package = new CommentatorPackage() as IVsPackage;
