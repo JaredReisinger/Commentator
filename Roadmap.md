@@ -7,11 +7,11 @@ layout: default
 
  * Auto-wrap comments as they are typed
 
-  * whitespace-separated words wrap on or before the line-length limit
+  * <s>whitespace-separated words wrap on or before the line-length limit</s>
 
-  * if the next line starts with a matching comment delimiter (same whitespace
+  * <s>if the next line starts with a matching comment delimiter (same whitespace
     before and after the "//") the word is injected into the beginning of the
-    line and that line is also wrapped
+    line and that line is also wrapped</s>
 
  * DocComment formatting
 
@@ -23,7 +23,7 @@ layout: default
 
   * support images in DocComments?  (and maybe elsewhere?)
 
- * also support prefix-based formatting (+, ++, !, ?, etc.?)
+ * <s>also support prefix-based formatting (+, ++, !, ?, etc.?)</s>
 
  * also support limited markdown formatting?
 

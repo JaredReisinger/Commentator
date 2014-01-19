@@ -5,6 +5,12 @@ layout: default
 
 # Release Notes
 
+## v0.2.6 (19-Jan-2014)
+
+Fixed clipping/wrapping of comment lines with no whitespace.  Rather than
+introducing a line-break (as earlier versions did), the word is left as-is so
+that extra whitespace is not introduced into the comment.
+
 ## v0.2.4 (17-Jan-2014)
 
 Added "**Avoid wrapping before line**" setting to avoid wrapping in file-header
