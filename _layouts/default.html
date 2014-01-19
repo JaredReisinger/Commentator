@@ -1,6 +1,6 @@
-<!doctype html>
+﻿<!doctype html>
 <html>
-  <head>
+<head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
     <title>Commentator by JaredReisinger</title>
@@ -11,44 +11,50 @@
     <!--[if lt IE 9]>
     <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
-  </head>
-  <body>
+</head>
+<body>
     <div class="wrapper">
-      <header>
+        <header>
 
-        <h1>Commentator</h1>
+            <h1>Commentator</h1>
 
-        <p>Bringing a first-class comment experience to Visual Studio</p>
+            <p>Bringing a first-class comment experience to Visual Studio</p>
 
-        {% capture cleanedUrl %}{{ page.url | remove_first:'/' }}{% endcapture %}
+            {% capture cleanedUrl %}{{ page.url | remove_first:'/' }}{% endcapture %}
 
-        {% for item in site.data.mainlinks %}          
-          {% capture linkClass %}{% if cleanedUrl == item.link %}current{% endif %}{% endcapture %}
-        <p><a href="{{ item.link }}" class="{{ linkClass }}">{{ item.title }}</a></p>
-        {% endfor %}
+            {% for item in site.data.mainlinks %}
+            {% capture linkClass %}{% if cleanedUrl == item.link %}current{% endif %}{% endcapture %}
+            <p><a href="{{ item.link }}" class="{{ linkClass }}">{{ item.title }}</a></p>
+            {% endfor %}
 
-        <hr />
+            <hr />
 
-        <p class="view">
-          <a href="https://github.com/JaredReisinger/Commentator">View the Project on GitHub <small>JaredReisinger/Commentator</small></a>
-        </p>
+            <p class="view">
+                <a href="http://visualstudiogallery.msdn.microsoft.com/35d6308f-b66b-4bd0-8c1d-3ce901cebdb6">
+                    View the Extension on the VS Gallery<small>Extensions &gt; Tools &gt; Commentator</small>
+                </a>
+            </p>
 
-        <ul class="btn">
-          <li><a href="https://github.com/JaredReisinger/Commentator/zipball/master">Download <strong>ZIP File</strong></a></li>
-          <li><a href="https://github.com/JaredReisinger/Commentator/tarball/master">Download <strong>TAR Ball</strong></a></li>
-          <li><a href="https://github.com/JaredReisinger/Commentator">View On <strong>GitHub</strong></a></li>
-        </ul>
+            <p class="view">
+                <a href="https://github.com/JaredReisinger/Commentator">View the Project on GitHub <small>JaredReisinger/Commentator</small></a>
+            </p>
 
-      </header>
-      <section>
-      {{ content }}
-      </section>
-      <footer>
-        <p>This project is maintained by <a href="https://github.com/JaredReisinger">JaredReisinger</a></p>
-        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
-      </footer>
+            <ul class="btn">
+                <li><a href="https://github.com/JaredReisinger/Commentator/zipball/master">Download <strong>ZIP File</strong></a></li>
+                <li><a href="https://github.com/JaredReisinger/Commentator/tarball/master">Download <strong>TAR Ball</strong></a></li>
+                <li><a href="https://github.com/JaredReisinger/Commentator">View On <strong>GitHub</strong></a></li>
+            </ul>
+
+        </header>
+        <section>
+            {{ content }}
+        </section>
+        <footer>
+            <p>This project is maintained by <a href="https://github.com/JaredReisinger">JaredReisinger</a></p>
+            <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+        </footer>
     </div>
     <script src="javascripts/scale.fix.js"></script>
-    
-  </body>
+
+</body>
 </html>
