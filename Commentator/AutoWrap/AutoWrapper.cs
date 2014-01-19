@@ -443,12 +443,18 @@ namespace Spudnoggin.Commentator.AutoWrap
                     var candidate = builder.ToString(0, commentWrapLength + 1);
                     var end = candidate.LastIndexOfAny(Whitespace);
 
-                    // TODO: if there isn't a wrap-point, take the whole string
-                    // and look forward... we'll just have to live with a long
-                    // line.  For now, we force-wrap at limit.
+                    // If there isn't a wrap-point within the wrapping length,
+                    // take the whole string and look forward... we'll just have
+                    // to live with a long line.
                     if (end < 0)
                     {
-                        end = commentWrapLength;
+                        candidate = builder.ToString();
+                        end = candidate.IndexOfAny(Whitespace);
+
+                        if (end < 0)
+                        {
+                            end = candidate.Length;
+                        }
                     }
 
                     // Only replace if we ended up with different text...

@@ -50,13 +50,7 @@ namespace Commentator_UnitTests
         }
 
         [TestMethod]
-        public void AutoWrapper_Wrap_BAD_OverlongLinesClip()
-        {
-            AssertSequence(Rewrap("123456", 5), "12345", "6");
-        }
-
-        [TestMethod]
-        public void AutoWrapper_Wrap_TODO_OverlongLinesDontClip()
+        public void AutoWrapper_Wrap_OverlongLinesDontClip()
         {
             AssertSequence(Rewrap("123456", 5), "123456");
             AssertSequence(Rewrap("123456", 5), "123456");
