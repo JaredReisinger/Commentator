@@ -12,9 +12,16 @@ namespace Commentator_UnitTests
     public class SimpleBuffer : ITextBuffer
     {
         SimpleSnapshot snapshot;
+        bool editable = true;
         PropertyCollection properties = new PropertyCollection();
 
-        public SimpleBuffer(SimpleSnapshot snapshot)
+        public SimpleBuffer(bool editable = true)
+        {
+            this.editable = editable;
+        }
+
+        public SimpleBuffer(SimpleSnapshot snapshot, bool editable = true)
+            : this(editable: editable)
         {
             this.snapshot = snapshot;
         }
@@ -34,7 +41,7 @@ namespace Commentator_UnitTests
 
         public bool CheckEditAccess()
         {
-            throw new NotImplementedException();
+            return this.editable;
         }
 
         public Microsoft.VisualStudio.Utilities.IContentType ContentType

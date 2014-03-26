@@ -43,82 +43,41 @@ namespace Spudnoggin.Commentator.AutoWrap
 
         private void TextBuffer_Changed(object sender, TextContentChangedEventArgs e)
         {
-            if (!this.options.AutoWrapEnabled)
-            {
-                return;
-            }
-
-            // The auto-wrap should only apply during simple typing.  Region
-            // edits (simultaneous multi-line typing) could lead to truly bizarre
-            // wrapping behavior, so it really doesn't make sense.
-            if (e.Changes.Count() > 1)
-            {
-                return;
-            }
-
-            var snapshot = e.After;
-            var change = e.Changes[0];
-            var buffer = snapshot.TextBuffer;
-            var caret = this.view.Caret.Position;  // caret is in *old* snapshot, typically(!?)
-            var caretPosition = caret.Point.GetPoint(snapshot, caret.Affinity).GetValueOrDefault();
-
-            // If the caret isn't near the change, this was an undo, or other operation
-            // we shouldn't wrap on!
-            if ((caretPosition.Snapshot != snapshot) ||
-                (caretPosition < change.NewPosition) ||
-                (caretPosition > change.NewEnd))
-            {
-                return;
-            }
-
-            if (!buffer.CheckEditAccess())
-            {
-                return;
-            }
+            ITextSnapshot snapshot = e.After;
+            ITextBuffer buffer = snapshot.TextBuffer;
+            SnapshotPoint caretPoint;
+            int avoidWrappingBeforeLine;
+            int firstLine;
+            LineCommentInfo info;
+            int commentWrapLength;
 
             // The UI shows lines as 1-based, but the API is 0-based, so we need
             // to subtract 1.
-            var avoidWrappingBeforeLine = Math.Max(0, this.options.AvoidWrappingBeforeLine - 1);
-            var firstLine = snapshot.GetLineNumberFromPosition(change.NewPosition);
+            avoidWrappingBeforeLine = Math.Max(0, options.AvoidWrappingBeforeLine - 1);
 
-            // If we're in the "don't auto-wrap" leading lines, bail.
-            if (firstLine < avoidWrappingBeforeLine)
+            if (!ShouldWrapPrelim(
+                    this.options.AutoWrapEnabled,
+                    avoidWrappingBeforeLine,
+                    e.Changes,
+                    snapshot,
+                    buffer,
+                    this.view.Caret.Position,
+                    out caretPoint,
+                    out firstLine))
             {
                 return;
             }
 
-            // Do some quick checks so we can fast-bail if this doesn't appear
-            // to be a comment-line edit...
+            // Get the line information.
             var line = snapshot.GetLineFromLineNumber(firstLine);
-            var info = LineCommentInfo.FromLine(line, this.view.Options, this.classifier);
+            info = LineCommentInfo.FromLine(line, this.view.Options, this.classifier);
 
-            if (info == null || (!info.CommentOnly && !this.options.CodeWrapEnabled))
-            {
-                return;
-            }
-
-            // For now, we're only supporting single-line comments.
-            if (info.Style != CommentStyle.SingleLine)
-            {
-                return;
-            }
-
-            // If we just typed whitespace at the *end* of the line, don't do
-            // any wrapping yet.  (It will cause us to trim the trailing space,
-            // which would makeeverythingruntogetherlikethis!  It also makes
-            // newline handling weird.)
-            if ((change.Delta > 0) &&
-                ((change.NewSpan.End >= line.End) && (change.NewSpan.End <= line.EndIncludingLineBreak)) &&
-                change.NewText.All(c => Whitespace.Contains(c)))
-            {
-                return;
-            }
-
-            var commentWrapLength = this.options.AutoWrapColumn - info.ContentColumnStart;
-
-            // There's some minimum length after which wrapping becomes
-            // pointless...
-            if (commentWrapLength < this.options.MinimumWrapWidth)
+            if (!ShouldWrap(
+                    this.options,
+                    e.Changes[0],
+                    line,
+                    info,
+                    out commentWrapLength))
             {
                 return;
             }
@@ -145,7 +104,7 @@ namespace Spudnoggin.Commentator.AutoWrap
             // Figure out the relative position of the caret within the comment
             // content.  We'll need this to dead-reckon the final location the
             // caret should have.
-            var caretContentOffset = caretPosition - info.ContentSpan.Start;
+            var caretContentOffset = caretPoint - info.ContentSpan.Start;
             var caretCommentIndex = precedingInfos.Count;
 
             firstLine -= precedingInfos.Count;
@@ -292,6 +251,106 @@ namespace Spudnoggin.Commentator.AutoWrap
             // because we might have just moved the text behind it to the
             // next line... (no longer needed... this should trigger an
             // additional change...
+        }
+
+        private static bool ShouldWrapPrelim(
+            bool optionsAutoWrapEnabled,
+            int optionsAvoidWrappingBeforeLine,
+            INormalizedTextChangeCollection changes,
+            ITextSnapshot snapshot,
+            ITextBuffer buffer,
+            CaretPosition caretPosition,
+            out SnapshotPoint caretPoint,
+            out int firstLine)
+        {
+            caretPoint = default(SnapshotPoint);
+            firstLine = -1;
+
+            if (!optionsAutoWrapEnabled)
+            {
+                return false;
+            }
+
+            if (!buffer.CheckEditAccess())
+            {
+                return false;
+            }
+
+            // The auto-wrap should only apply during simple typing.  Region
+            // edits (simultaneous multi-line typing) could lead to truly bizarre
+            // wrapping behavior, so it really doesn't make sense.
+            if (changes.Count > 1)
+            {
+                return false;
+            }
+
+            // Need a better (more testable!) way to get the editing state
+            // (change, caret, etc.) out.  Perhaps we just take the hit and get
+            // all of these up front instead of only calculating them as needed?
+            var change = changes[0];
+            caretPoint = caretPosition.Point.GetPoint(snapshot, caretPosition.Affinity).GetValueOrDefault();
+
+            // If the caret isn't near the change, this was an undo, or other operation
+            // we shouldn't wrap on!
+            if ((caretPoint.Snapshot != snapshot) ||
+                (caretPoint < change.NewPosition) ||
+                (caretPoint > change.NewEnd))
+            {
+                return false;
+            }
+
+            firstLine = snapshot.GetLineNumberFromPosition(change.NewPosition);
+
+            // If we're in the "don't auto-wrap" leading lines, bail.
+            if (firstLine < optionsAvoidWrappingBeforeLine)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        private static bool ShouldWrap(
+            GeneralOptions options,
+            ITextChange change,
+            ITextSnapshotLine line,
+            LineCommentInfo info,
+            out int commentWrapLength)
+        {
+            commentWrapLength = -1;
+
+            if (info == null || (!info.CommentOnly && !options.CodeWrapEnabled))
+            {
+                return false;
+            }
+
+            // For now, we're only supporting single-line comments.
+            if (info.Style != CommentStyle.SingleLine)
+            {
+                return false;
+            }
+
+            // If we just typed whitespace at the *end* of the line, don't do
+            // any wrapping yet.  (It will cause us to trim the trailing space,
+            // which would makeeverythingruntogetherlikethis!  It also makes
+            // newline handling weird.)
+            if ((change.Delta > 0) &&
+                ((change.NewSpan.End >= line.End) && (change.NewSpan.End <= line.EndIncludingLineBreak)) &&
+                change.NewText.All(c => Whitespace.Contains(c)))
+            {
+                return false;
+            }
+
+            commentWrapLength = options.AutoWrapColumn - info.ContentColumnStart;
+
+            // There's some minimum length after which wrapping becomes
+            // pointless...
+            if (commentWrapLength < options.MinimumWrapWidth)
+            {
+                return false;
+            }
+
+            return true;
         }
 
         private string LeadingWhitespaceFromInfo(LineCommentInfo info)
