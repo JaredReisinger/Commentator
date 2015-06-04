@@ -100,6 +100,40 @@ namespace Commentator_UnitTests
         }
 
         [TestMethod]
+        public void AutoWrapper_ShouldWrapPrelim_ShouldWrapWhenCaretInChange()
+        {
+            var snapshot = new SimpleSnapshot(
+                "// Caret and change is >|< here.");  // "|" at pos 25
+            var changes = new StubINormalizedTextChangeCollection();
+            changes.CountGet = () => 1;
+            changes.ItemGetInt32 = i =>
+            {
+                Assert.AreEqual(0, i);
+                var change = new StubITextChange();
+                change.NewPositionGet = () => 25;
+                change.NewEndGet = () => 26;
+                return change;
+            };
+
+            var mappingPoint = new StubIMappingPoint();
+            mappingPoint.GetPointITextSnapshotPositionAffinity = (s, p) =>
+            {
+                return new SnapshotPoint(s, 25);
+            };
+
+            var caretPosition = new CaretPosition(
+                new VirtualSnapshotPoint(snapshot, 25),
+                mappingPoint,
+                PositionAffinity.Successor);
+
+            Assert.IsTrue(ShouldWrapPrelim(
+                buffer: snapshot.TextBuffer,
+                changes: changes,
+                snapshot: snapshot,
+                caretPosition: caretPosition));
+        }
+
+        [TestMethod]
         public void AutoWrapper_ShouldWrapPrelim_ShouldNotWrapNonCaretChange()
         {
             var snapshot = new SimpleSnapshot(
@@ -133,6 +167,97 @@ namespace Commentator_UnitTests
                 snapshot: snapshot,
                 caretPosition: caretPosition));
         }
+
+        [TestMethod]
+        public void AutoWrapper_ShouldWrapPrelim_ShouldNotWrapBeforeOptionFirstLine()
+        {
+            var snapshot = new SimpleSnapshot(
+                "// Caret and change is >|< here.");  // "|" at pos 25
+            var changes = new StubINormalizedTextChangeCollection();
+            changes.CountGet = () => 1;
+            changes.ItemGetInt32 = i =>
+            {
+                Assert.AreEqual(0, i);
+                var change = new StubITextChange();
+                change.NewPositionGet = () => 25;
+                change.NewEndGet = () => 26;
+                return change;
+            };
+
+            var mappingPoint = new StubIMappingPoint();
+            mappingPoint.GetPointITextSnapshotPositionAffinity = (s, p) =>
+            {
+                return new SnapshotPoint(s, 26);
+            };
+
+            var caretPosition = new CaretPosition(
+                new VirtualSnapshotPoint(snapshot, 26),
+                mappingPoint,
+                PositionAffinity.Successor);
+
+            Assert.IsFalse(ShouldWrapPrelim(
+                buffer: snapshot.TextBuffer,
+                changes: changes,
+                snapshot: snapshot,
+                caretPosition: caretPosition,
+                optionsAvoidWrappingBeforeLine: 5));
+        }
+
+        [TestMethod]
+        public void AutoWrapper_ShouldWrap_ShouldNotWrapWithNullInfo()
+        {
+            int commentWrapLength;
+            Assert.IsFalse(ShouldWrap(null, null, null, null, out commentWrapLength));
+        }
+
+        [TestMethod]
+        public void AutoWrapper_ShouldWrap_ShouldNotWrapCodeLineWithOption()
+        {
+            int commentWrapLength;
+            GeneralOptions options = new GeneralOptions();
+            options.CodeWrapEnabled = false;
+
+            var snapshot = new SimpleSnapshot("int code = 1; // comment with code");
+
+            var commentClass = new StubIClassificationType();
+            commentClass.ClassificationGet = () => "comment";
+            commentClass.IsOfTypeString = s => string.Equals(s, "comment");
+
+            var codeClass = new StubIClassificationType();
+            codeClass.ClassificationGet = () => "code";
+            codeClass.IsOfTypeString = s => string.Equals(s, "code");
+
+            var classifier = new StubIClassifier();
+            classifier.GetClassificationSpansSnapshotSpan = s =>
+            {
+                // Find the "//"... Note: doesn't look for "''" (VB) or "/*"
+                // (multi-line).  That might need to change when we start
+                // supporting more comment styles.
+                var markerStart = s.GetText().IndexOf("//");
+                Assert.IsTrue(markerStart >= 0);
+                var codeSpan = new SnapshotSpan(s.Start, s.Start + markerStart);
+                var commentSpan = new SnapshotSpan(s.Start + markerStart, s.End);
+
+                var list = new List<ClassificationSpan>();
+                list.Add(new ClassificationSpan(codeSpan, codeClass));
+                list.Add(new ClassificationSpan(commentSpan, commentClass));
+                return list;
+            };
+
+            SimpleEditorOptions editorOptions = new SimpleEditorOptions();
+            editorOptions.SetOptionValue("Tabs/ConvertTabsToSpaces", true);
+            editorOptions.SetOptionValue("Tabs/TabSize", 4);
+
+            var info = LineCommentInfo.FromLine(
+                snapshot.GetLineFromLineNumber(0),
+                editorOptions,
+                classifier);
+
+            Assert.IsFalse(ShouldWrap(options, null, null, info, out commentWrapLength));
+        }
+
+        // TODO: don't wrap spaces at end of line!
+
 
         private static string Flatten(params string[] lines)
         {
